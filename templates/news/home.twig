@@ -1,0 +1,303 @@
+{% extends "base.twig" %}
+
+{% set page_title = siteName %}
+{% set subPageDescription = siteDescription %}
+{% set nav_active = "home" %}
+
+{% block content %}
+
+  {% if moduleEnabled('ads') and ads_home_top is defined and ads_home_top|length > 0 %}
+  <!-- ===== AD: HOME TOP ===== -->
+  <div class="ad-zone ad-zone-top">
+    <div class="container">
+      <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+      <div class="ad-row">
+        {% for ad in ads_home_top %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if moduleEnabled('blogs') and news_latest is defined and news_latest|length > 0 %}
+  {% if tickerEnabled %}
+  <!-- ===== BREAKING TICKER ===== -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span class="ticker-label">عاجل</span>
+      <div class="ticker-track">
+        <div class="ticker-items" style="animation-duration: {{ tickerSpeed }}s;">
+          {% for item in news_latest|slice(0, 5) %}
+          <a href="{{ item.url }}">{{ item.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== LEAD + SECONDARY STORIES ===== -->
+  <section class="lead-section">
+    <div class="container">
+      <div class="lead-grid">
+        {% set lead = news_latest[0] %}
+        <a class="lead-story" href="{{ lead.url }}">
+          <div class="lead-thumb">
+            {% if lead.image %}<img src="{{ lead.image }}" alt="{{ lead.name }}" loading="lazy">{% endif %}
+            {% if lead.featured %}<span class="breaking-pill">عاجل</span>{% elseif lead.category_name %}<span class="cat-pill">{{ lead.category_name }}</span>{% endif %}
+          </div>
+          <div class="lead-body">
+            <h1>{{ lead.name }}</h1>
+            {% if lead.description %}<p>{{ lead.description }}…</p>{% endif %}
+            <div class="meta-row">
+              {% if lead.date_human %}<span>{{ lead.date_human }}</span>{% endif %}
+              {% if lead.reading_time %}<span>{{ lead.reading_time }} {{ currentLang == 'en' ? 'min read' : 'دقائق قراءة' }}</span>{% endif %}
+              {% if lead.views %}<span>{{ lead.views }} {{ currentLang == 'en' ? 'views' : 'مشاهدة' }}</span>{% endif %}
+            </div>
+          </div>
+        </a>
+
+        <div class="secondary-list">
+          {% for item in news_latest|slice(1, 4) %}
+          <a class="secondary-story" href="{{ item.url }}">
+            <div class="secondary-thumb">{% if item.image %}<img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">{% endif %}</div>
+            <div class="secondary-body">
+              {% if item.featured %}<span class="cat-tag breaking">عاجل</span>{% elseif item.category_name %}<span class="cat-tag">{{ item.category_name }}</span>{% endif %}
+              <h3>{{ item.name }}</h3>
+              {% if item.date_human %}<span class="secondary-date">{{ item.date_human }}</span>{% endif %}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== NEWS GRID + SIDEBAR ===== -->
+  {% if moduleEnabled('blogs') %}
+  <section class="news-main">
+    <div class="container">
+      <div class="news-main-grid">
+
+        <div class="news-col">
+          {% if news_categories is defined and news_categories|length > 0 %}
+          <div class="chip-row">
+            {% for cat in news_categories %}
+            <a class="chip" href="{{ cat.url }}">{{ cat.name }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="section-head" style="text-align:right;margin-bottom:18px;">
+            <div class="eyebrow"><span class="dot"></span> آخر الأخبار</div>
+            <h2>أحدث ما نُشر</h2>
+          </div>
+
+          {% if news_latest|length > 5 %}
+          <div class="news-grid">
+            {% for item in news_latest|slice(5, 8) %}
+            <a class="news-card reveal" href="{{ item.url }}">
+              <div class="thumb">
+                {% if item.image %}
+                <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+                {% else %}
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                {% endif %}
+                {% if item.featured %}<span class="breaking-pill sm">عاجل</span>{% elseif item.category_name %}<span class="cat-pill sm">{{ item.category_name }}</span>{% endif %}
+              </div>
+              <div class="body">
+                <h3>{{ item.name }}</h3>
+                {% if item.date_human %}<span class="secondary-date">{{ item.date_human }}</span>{% endif %}
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <p style="text-align:center;margin-top:26px;"><a href="{{ siteUrl }}{{ routes.blog }}" class="btn btn-ghost">تصفّح كل الأخبار</a></p>
+        </div>
+
+        <aside class="news-aside">
+          {% if news_trending is defined and news_trending|length > 0 %}
+          <div class="aside-box">
+            <h4>الأكثر قراءة</h4>
+            <div class="trending-list">
+              {% for item in news_trending %}
+              <a class="trending-item" href="{{ item.url }}">
+                <span class="rank">{{ loop.index }}</span>
+                <span class="t-name">{{ item.name }}</span>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if moduleEnabled('mailing') %}
+          <div class="aside-box aside-newsletter">
+            <h4>النشرة البريدية</h4>
+            <p>أهم الأخبار تصل بريدك أولاً بأول.</p>
+            <form class="newsletter-form-v" id="newsletterForm">
+              <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+                <label for="newsletterWebsite">Website</label>
+                <input type="text" id="newsletterWebsite" tabindex="-1" autocomplete="off">
+              </div>
+              <input type="email" id="newsletterEmail" placeholder="{{ lang.email }}" required>
+              <button type="submit" class="btn btn-primary">{{ lang.send_message|default('اشترك') }}</button>
+            </form>
+            <div class="newsletter-note" id="newsletterNote" data-success-text="{{ lang.newsletter_subscribed_success|default('تم الاشتراك بنجاح!') }}">{{ lang.newsletter_privacy_note|default('لن نشارك بريدك مع أي طرف آخر.') }}</div>
+          </div>
+          {% endif %}
+
+          {% if moduleEnabled('contact') %}
+          <div class="aside-box">
+            <h4>تواصل معنا</h4>
+            {% if site_mail %}<a class="row" href="mailto:{{ site_mail }}"><svg viewBox="0 0 24 24"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><span>{{ site_mail }}</span></a>{% endif %}
+            {% if whatsapp_number %}<a class="row" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg><span>{{ lang.whatsapp }}</span></a>{% endif %}
+            <a class="row" href="{{ siteUrl }}{{ routes.contact }}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ lang.contact_us }}</span></a>
+          </div>
+          {% endif %}
+        </aside>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if moduleEnabled('ads') and ads_home_between is defined and ads_home_between|length > 0 %}
+  <!-- ===== AD: HOME BETWEEN ===== -->
+  <div class="ad-zone ad-zone-between">
+    <div class="container">
+      <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+      <div class="ad-row">
+        {% for ad in ads_home_between %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== STATS (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('stats') and stats is defined and stats|length > 0 %}
+  <section style="background:var(--surface);border-top:1px solid var(--outline);border-bottom:1px solid var(--outline);">
+    <div class="container">
+      <div class="stats-bar">
+        {% for stat in stats %}
+        <div class="stat-item">
+          {% if stat.icon %}<div class="ic"><i class="{{ stat.icon }}"></i></div>{% endif %}
+          <div class="num">{{ stat.number }}{{ stat.suffix }}</div>
+          <div class="label">{{ stat.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== فريق التحرير (وحدة team) ===== -->
+  {% if moduleEnabled('team') and team is defined and team|length > 0 %}
+  <section id="team">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> فريق التحرير</div>
+        <h2>الأشخاص خلف {{ siteName }}</h2>
+        <p>الكتّاب والمحررون المسؤولون عن تغطية الأخبار ونشرها.</p>
+      </div>
+      <div class="team-grid">
+        {% for member in team %}
+        <div class="team-card">
+          {% if member.image is defined and member.image != "" and member.image is not empty %}
+          <div class="team-avatar"><img src="{{ member.image }}" alt="{{ member.name }}" loading="lazy"></div>
+          {% else %}
+          <div class="team-avatar"><img src="files/images/avatar.png" alt="{{ member.name }}" loading="lazy"></div>
+          {% endif %}
+          <h3>{{ member.name }}</h3>
+          {% if member.position %}<div class="team-role">{{ member.position }}</div>{% endif %}
+          {% if member.bio %}<div class="team-bio">{{ member.bio|raw }}</div>{% endif %}
+          {% if member.facebook or member.twitter or member.linkedin or member.whatsapp or member.website or member.phone or member.instagram or member.snapchat %}
+          <div class="team-social">
+            {% if member.facebook %}<a href="{{ member.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>{% endif %}
+            {% if member.twitter %}<a href="{{ member.twitter }}" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg></a>{% endif %}
+            {% if member.linkedin %}<a href="{{ member.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg></a>{% endif %}
+            {% if member.instagram %}<a href="{{ member.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg></a>{% endif %}
+            {% if member.snapchat %}<a href="{{ member.snapchat }}" target="_blank" rel="noopener" aria-label="Snapchat"><svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.2-5 5.2 0 1 .1 1.9.3 2.7-1 .3-2 .9-2.7 1.7-.2.3 0 .7.4.7.6 0 1.2-.1 1.7-.3.1.7.4 1.3.8 1.8-.5.4-1.2.8-2 1-.4.1-.4.7 0 .9 1 .5 2.3.8 3.5.9.5.7 1.6 1.2 3 1.2s2.5-.5 3-1.2c1.2-.1 2.5-.4 3.5-.9.4-.2.4-.8 0-.9-.8-.2-1.5-.6-2-1 .4-.5.7-1.1.8-1.8.5.2 1.1.3 1.7.3.4 0 .6-.4.4-.7-.7-.8-1.7-1.4-2.7-1.7.2-.8.3-1.7.3-2.7C17 5.2 15 3 12 3z"/></svg></a>{% endif %}
+            {% if member.whatsapp %}<a href="https://wa.me/{{ member.whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg></a>{% endif %}
+            {% if member.phone %}<a href="tel:{{ member.phone }}" aria-label="Phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>{% endif %}
+            {% if member.website %}<a href="{{ member.website }}" target="_blank" rel="noopener" aria-label="Website"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== BRANCHES / المكاتب ===== -->
+  {% if moduleEnabled('branches') and branches is defined and branches|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> مكاتبنا</div>
+        <h2>أينما تكون، أخبارنا تصلك</h2>
+      </div>
+      <div class="branches-grid">
+        {% for branch in branches %}
+        <div class="branch-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+          <h3>{{ branch.name }}</h3>
+          {% if branch.address %}
+          <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ branch.address }}</span></div>
+          {% endif %}
+          {% if branch.phone %}
+          <a class="row" href="tel:{{ branch.phone }}"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>{{ branch.phone }}</span></a>
+          {% endif %}
+          {% if branch.email %}
+          <a class="row" href="mailto:{{ branch.email }}"><svg viewBox="0 0 24 24"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><span>{{ branch.email }}</span></a>
+          {% endif %}
+          {% if branch.working_hours %}
+          <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ branch.working_hours }}</span></div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== FAQ ===== -->
+  {% if moduleEnabled('faq') and faqs is defined and faqs|length > 0 %}
+  <section id="faq">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> الأسئلة الشائعة</div>
+        <h2>أسئلة يتكرر سؤالنا عنها</h2>
+      </div>
+      <div class="faq">
+        {% for item in faqs %}
+        <details{% if loop.first %} open{% endif %}>
+          <summary>{{ item.question }}</summary>
+          <p>{{ item.answer|striptags }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.twig" %}
+
+{% set page_title = pricingSeo.title_en|default("Pricing Plans - " ~ siteName) %}
+{% set subPageDescription = pricingSeo.description_en|default("Transparent, straightforward pricing for our plans. Compare plans and request a custom quote that fits your needs.") %}
+{% set og_url = "pricing" %}
+{% set page_type = "website" %}
+{% set nav_active = "pricing" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="{{ siteUrl }}">{{ lang.home }}</a>
+        <span class="sep">/</span>
+        <span class="current">{{ lang.pricing|default('Pricing') }}</span>
+    </div>
+</div>
+
+<!-- ===== PRICING HERO ===== -->
+
+<section style="padding-top:8px;">
+    <div class="container">
+        <div class="section-head">
+            <div class="eyebrow"><span class="dot"></span> Pricing</div>
+            <h1 style="font-size:clamp(26px,4vw,40px);font-weight:900;line-height:1.25;margin:0 0 14px;">{{ pricingPage is defined and pricingPage.title_en is defined ? pricingPage.title_en : "Pricing Plans - " ~ siteName }}</h1>
+            <p>{{ pricingPage is defined and pricingPage.description_en is defined ? pricingPage.description_en : "Transparent, straightforward pricing with no hidden fees. Choose the plan that fits your needs, or contact us for a custom quote." }}</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PRICING CARDS (from the dashboard) ===== -->
+
+{% if pricing is defined and pricing|length > 0 %}
+
+<section style="padding-top:0;">
+    <div class="container">
+        <div class="pricing-grid">
+            {% for plan in pricing %}
+            <div class="pricing-card{% if plan.is_featured %} featured{% endif %}">
+                {% if plan.is_featured %}<span class="pricing-badge">{{ lang.most_popular }}</span>{% endif %}
+                <h3>{{ plan.name }}</h3>
+                <div class="pricing-price">{{ plan.price }}<span>{{ plan.currency }}</span></div>
+                {% if plan.period %}<div class="pricing-period">{{ plan.period }}</div>{% endif %}
+                {% if plan.features|length > 0 %}
+                <ul class="pricing-features">
+                    {% for feature in plan.features %}
+                    <li><svg viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg> {{ feature }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if moduleEnabled('contact') %}
+                <a href="{{ siteUrl }}#contact" class="btn btn-block {% if plan.is_featured %}btn-primary{% else %}btn-ghost{% endif %}">{{ lang.get_in_touch }}</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:18px;">Prices shown are estimates and do not include any additional features or customizations agreed upon separately.</p>
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== COMPARISON TABLE (from the dashboard — columns are dynamic based on actual pricing plans) ===== -->
+
+{% if pricingCompareRows is defined and pricingCompareRows|length > 0 and pricing|length > 0 %}
+
+<section style="background:var(--bg);">
+    <div class="container">
+        <div class="section-head">
+            <div class="eyebrow"><span class="dot"></span> {{ pricingCompare.eyebrow_en|default('Detailed Comparison') }}</div>
+            <h2>{{ pricingCompare.title_en|default('Which plan is right for your team?') }}</h2>
+            <p>{{ pricingCompare.description_en|default('A quick comparison of the key differences between the plans.') }}</p>
+        </div>
+        <div class="compare compare-plans" style="--compare-cols:{{ pricing|length }};">
+            <div class="compare-row compare-head">
+                <div>Feature</div>
+                {% for plan in pricing %}<div class="cell">{{ plan.name }}</div>{% endfor %}
+            </div>
+            {% for row in pricingCompareRows %}
+            <div class="compare-row">
+                <div>{{ row.feature }}</div>
+                {% for plan in pricing %}
+                <div class="cell {% if row.values[plan.id] == '✓' %}cell-yes{% elseif row.values[plan.id] == '✕' %}cell-no{% endif %}">{{ row.values[plan.id] }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endif %}
+
+<!-- ===== PRICING FAQ ===== -->
+
+{% if pricing_faqs is defined and pricing_faqs|length > 0 %}
+
+<section id="pricing-faq">
+    <div class="container">
+        <div class="section-head">
+            <div class="eyebrow"><span class="dot"></span> Frequently Asked Questions About Pricing</div>
+            <h2>Everything You Need to Know About Pricing and Billing</h2>
+        </div>
+        <div class="faq">
+            {% for item in pricing_faqs %}
+            <details{% if loop.first %} open{% endif %}>
+                <summary>{{ item.q }}</summary>
+                <p>{{ item.a }}</p>
+                </details>
+                {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== CTA ===== -->
+
+{% if moduleEnabled('contact') %}
+
+<section style="background:var(--bg);">
+    <div class="container">
+        <div class="cta">
+            <h2>Didn't find the right plan?</h2>
+            <p>Contact us and we'll send you a custom quote that fits your needs.</p>
+            <div class="cta-ctas">
+                <a class="btn btn-white" href="{{ siteUrl }}#contact">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

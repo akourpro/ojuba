@@ -1,0 +1,93 @@
+{% extends "base.twig" %}
+
+{% set page_title = service.name %}
+{% set subPageDescription = service.description|striptags|slice(0, 160) %}
+{% set og_url = routes.service ~ "/" ~ service.slug %}
+{% set basicIMG = service.image %}
+{% set page_type = "article" %}
+{% set nav_active = "services" %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ siteUrl }}">{{ lang.home }}</a>
+      <span class="sep">/</span>
+      <a href="{{ siteUrl }}{{ routes.service }}">{{ lang.services|default('خدماتنا') }}</a>
+      <span class="sep">/</span>
+      <span class="current">{{ service.name }}</span>
+    </div>
+
+    <!-- ===== SERVICE HEAD ===== -->
+    <div class="article-head">
+      <h1>{{ service.name }}</h1>
+      <div class="article-meta">
+        <div class="avatar">{{ siteName|slice(0,2) }}</div>
+        <span>{{ siteName }}</span>
+      </div>
+    </div>
+
+    {% if service.image %}
+    <div class="article-image">
+      <img src="{{ service.image }}" alt="{{ service.name }}" loading="lazy">
+    </div>
+    {% endif %}
+
+    <!-- ===== SERVICE BODY ===== -->
+    <article class="article-body">
+      {{ service.description|raw }}
+    </article>
+
+    <div class="share-row" style="max-width:720px;margin-inline:auto;">
+      <span class="label">{{ lang.share|default('شارك:') }}</span>
+      <a class="social-btn" href="https://x.com/intent/tweet?url={{ siteUrl ~ og_url }}&text={{ service.name }}" target="_blank" rel="noopener" aria-label="X">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+      </a>
+      <a class="social-btn" href="https://www.linkedin.com/sharing/share-offsite/?url={{ siteUrl ~ og_url }}" target="_blank" rel="noopener" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg>
+      </a>
+      <a class="social-btn" href="https://wa.me/?text={{ service.name }}%20{{ siteUrl ~ og_url }}" target="_blank" rel="noopener" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg>
+      </a>
+    </div>
+  </div>
+
+  {% if moduleEnabled('contact') %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="cta">
+        <h2>{{ currentLang == 'en' ? "Interested in this service?" : "مهتم بهذه الخدمة؟" }}</h2>
+        <p>{{ currentLang == 'en' ? "Contact us and we'll get back to you shortly." : "تواصل معنا وسنعاود التواصل معك في أقرب وقت." }}</p>
+        <div class="cta-ctas">
+          <a class="btn btn-white" href="{{ siteUrl }}{{ routes.contact }}">{{ lang.contact_us }}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if other_services is defined and other_services|length > 0 %}
+  <!-- ===== OTHER SERVICES ===== -->
+  <div class="related-wrap">
+    <div class="container">
+      <div class="related-head">
+        <div class="eyebrow"><span class="dot"></span> {{ lang.services|default('خدماتنا') }}</div>
+        <h2>{{ currentLang == 'en' ? "Other services" : "خدمات أخرى قد تهمك" }}</h2>
+      </div>
+      <div class="blog-grid">
+        {% for os in other_services %}
+        <a class="blog-card" href="{{ os.slug }}">
+          <div class="thumb">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </div>
+          <div class="body">
+            <h3>{{ os.name }}</h3>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{
+    "name": "News",
+    "activity_type": "blog",
+    "data": {
+        "name": "الأخبار",
+        "description": "قالب صحفي كثيف بهوية حمراء/سوداء كلاسيكية، مبني حول وحدتي المقالات والأقسام: مقال رئيسي بارز، شبكة أخبار حسب القسم، شريط \"الأكثر قراءة\"، وقائمة أقسام في الهيدر. مناسب للمواقع الإخبارية والمجلات الإلكترونية ومواقع المحتوى الكثيف.",
+        "design": "أُعجوبة",
+        "url": "https://ojuba.sa"
+    },
+    "modules": {
+        "pages": true,
+        "blogs": true,
+        "blog_categories": true,
+        "services": false,
+        "portfolio": false,
+        "categories": false,
+        "contact": true,
+        "search": true,
+        "clients": false,
+        "team": true,
+        "testimonials": false,
+        "faq": true,
+        "stats": true,
+        "pricing": false,
+        "branches": true,
+        "certificates": false,
+        "mailing": true
+    }
+}

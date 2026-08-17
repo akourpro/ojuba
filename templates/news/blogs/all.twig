@@ -1,0 +1,113 @@
+{% extends "base.twig" %}
+
+{% set page_title = currentLang == 'en' ? "Blog" ~ " - " ~ siteName : "مدونة " ~ siteName %}
+{% set subPageDescription = currentLang == 'en' ? "Articles and practical guides from the " ~ siteName ~ " team." : "مقالات وأدلة عملية من فريق " ~ siteName ~ "." %}
+{% set og_url = routes.blog %}
+{% set nav_active = "blog" %}
+
+{% block content %}
+
+  <!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="container">
+      <div class="eyebrow"><span class="dot" style="background:#fff;"></span> {{ lang.blog }}</div>
+      <h1>{{ lang.blog }} {{ siteName }}</h1>
+      <p>{{ lang.have_a_question }}</p>
+      <div class="search-box">
+        <input type="text" id="blogSearch" placeholder="{{ lang.search_here }}…">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BLOG GRID ===== -->
+  <section style="padding-top:40px;">
+    <div class="container">
+      {% if categories is defined and categories|length > 0 %}
+      <div class="filter-row" style="margin-top:0;">
+        <a href="{{ siteUrl }}{{ routes.blog }}?" class="filter-pill{% if not active_category %} active{% endif %}">{{ lang.all }}</a>
+        {% for cat in categories %}
+        <a href="{{ siteUrl }}{{ routes.blog }}?category={{ cat.id }}" class="filter-pill{% if active_category == cat.id %} active{% endif %}">{{ cat.name }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if blogs|length > 0 %}
+      <div class="blog-grid" id="blogGrid">
+        {% for post in blogs %}
+        <a class="blog-card reveal" href="{{ post.url }}" data-title="{{ post.name }}">
+          <div class="thumb">
+            {% if post.image %}
+            <img src="{{ post.image }}" alt="{{ post.name }}" loading="lazy">
+            {% else %}
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {% endif %}
+          </div>
+          <div class="body">
+            {% if post.category %}<span class="cat-tag">{{ post.category }}</span>{% endif %}
+            <h3>{{ post.name }}</h3>
+            <div class="meta">
+              <div class="avatar">{{ siteName|slice(0,2) }}</div>
+              <span>{{ siteName }}</span>
+              <span class="sep">•</span>
+              <span>{{ lang.read_more }} {% if lang.dir == "rtl" %}←{% else %}→{% endif %}</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      <p id="noResults" style="display:none;text-align:center;color:var(--muted);font-weight:700;margin-top:40px;">{{ lang.no_results }}</p>
+      {% else %}
+      <div style="text-align:center;color:var(--muted);font-weight:700;">{{ lang.no_results }}</div>
+      {% endif %}
+
+      {% if pagination is defined and pagination.total_pages > 1 %}
+      {% set cat_qs = active_category ? '&category=' ~ active_category : '' %}
+      <nav class="pagination" aria-label="pagination">
+        <ul>
+          <li class="{% if not pagination.has_prev %}disabled{% endif %}">
+            {% if pagination.has_prev %}<a href="{{ siteUrl }}{{ routes.blog }}?page={{ pagination.prev_page }}{{ cat_qs }}">{{ lang.previous }}</a>{% else %}<span>{{ lang.previous }}</span>{% endif %}
+          </li>
+          {% if pagination.show_first %}
+          <li><a href="{{ siteUrl }}{{ routes.blog }}?page=1{{ cat_qs }}">1</a></li>
+          {% if pagination.pages[0] > 2 %}<li class="dots"><span>…</span></li>{% endif %}
+          {% endif %}
+          {% for p in pagination.pages %}
+          <li class="{% if p == pagination.page %}active{% endif %}">
+            {% if p == pagination.page %}<span>{{ p }}</span>{% else %}<a href="{{ siteUrl }}{{ routes.blog }}?page={{ p }}{{ cat_qs }}">{{ p }}</a>{% endif %}
+          </li>
+          {% endfor %}
+          {% if pagination.show_last %}
+          {% if pagination.pages[pagination.pages|length - 1] < pagination.total_pages - 1 %}<li class="dots"><span>…</span></li>{% endif %}
+          <li><a href="{{ siteUrl }}{{ routes.blog }}?page={{ pagination.total_pages }}{{ cat_qs }}">{{ pagination.total_pages }}</a></li>
+          {% endif %}
+          <li class="{% if not pagination.has_next %}disabled{% endif %}">
+            {% if pagination.has_next %}<a href="{{ siteUrl }}{{ routes.blog }}?page={{ pagination.next_page }}{{ cat_qs }}">{{ lang.next }}</a>{% else %}<span>{{ lang.next }}</span>{% endif %}
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  {% if moduleEnabled('mailing') %}
+  <section>
+    <div class="container">
+      <div class="newsletter">
+        <h2>{{ currentLang == 'en' ? 'Never miss a story' : 'لا تفوّت أي خبر' }}</h2>
+        <p>{{ currentLang == 'en' ? 'Subscribe to get top stories in your inbox.' : 'اشترك لتصلك أهم الأخبار في بريدك أولاً بأول.' }}</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+            <label for="newsletterWebsite">Website</label>
+            <input type="text" id="newsletterWebsite" tabindex="-1" autocomplete="off">
+          </div>
+          <input type="email" id="newsletterEmail" placeholder="{{ lang.email }}" required>
+          <button type="submit" class="btn btn-white">{{ lang.send_message }}</button>
+        </form>
+        <div class="newsletter-note" id="newsletterNote" data-success-text="{{ lang.newsletter_subscribed_success }}">{{ lang.newsletter_privacy_note }}</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+{% endblock %}

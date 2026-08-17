@@ -1,0 +1,12 @@
+# مجلد معالج التثبيت (install/) — يحتاج .htaccess منفصل يُلغي صراحة
+# php_value auto_prepend_file الموروث من .htaccess بجذر المشروع (يضبط
+# autoload.php كملحق تلقائي بكل طلب PHP). لو بقي هذا الإعداد موروثاً هنا،
+# فإن أي زيارة لـ install/index.php قبل اكتمال التثبيت (أي قبل وجود
+# includes/config.php) ستفشل بخطأ قاتل لأن autoload.php يستدعي gsite() فوراً
+# وهي تتطلب اتصال قاعدة بيانات صالح. راجع التعليق أعلى install/index.php.
+php_value auto_prepend_file none
+php_value auto_append_file none
+
+DirectoryIndex index.php
+
+Options -Indexes -MultiViews

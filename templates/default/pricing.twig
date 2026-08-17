@@ -1,0 +1,121 @@
+{% extends "base.twig" %}
+
+{% set page_title = pricingSeo.title|default("أسعار وباقات " ~ siteName) %}
+{% set subPageDescription = pricingSeo.description|default("تسعير شفاف وواضح لباقاتنا. قارن بين الباقات، واطلب عرض سعر مخصص يناسب احتياجك.") %}
+{% set og_url = "pricing" %}
+{% set page_type = "website" %}
+{% set nav_active = "pricing" %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ siteUrl }}">{{ lang.home }}</a>
+      <span class="sep">/</span>
+      <span class="current">{{ lang.pricing|default('الأسعار') }}</span>
+    </div>
+  </div>
+
+  <!-- ===== PRICING HERO ===== -->
+  <section style="padding-top:8px;">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> الأسعار</div>
+        <h1 style="font-size:clamp(26px,4vw,40px);font-weight:900;line-height:1.25;margin:0 0 14px;">{{ pricingPage is defined and pricingPage.title is defined ? pricingPage.title : "أسعار وباقات " ~ siteName }}</h1>
+        <p>{{ pricingPage is defined and pricingPage.description is defined ? pricingPage.description : "تسعير شفاف وواضح لكل باقة — بدون رسوم مخفية. اختر الباقة المناسبة لاحتياجك، أو تواصل معنا لعرض سعر مخصص." }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRICING CARDS (من لوحة التحكم) ===== -->
+  {% if pricing is defined and pricing|length > 0 %}
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="pricing-grid">
+        {% for plan in pricing %}
+        <div class="pricing-card{% if plan.is_featured %} featured{% endif %}">
+          {% if plan.is_featured %}<span class="pricing-badge">{{ lang.most_popular }}</span>{% endif %}
+          <h3>{{ plan.name }}</h3>
+          <div class="pricing-price">{{ plan.price }}<span>{{ plan.currency }}</span></div>
+          {% if plan.period %}<div class="pricing-period">{{ plan.period }}</div>{% endif %}
+          {% if plan.features|length > 0 %}
+          <ul class="pricing-features">
+            {% for feature in plan.features %}
+            <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> {{ feature }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if moduleEnabled('contact') %}
+          <a href="{{ siteUrl }}#contact" class="btn btn-block {% if plan.is_featured %}btn-primary{% else %}btn-ghost{% endif %}">{{ lang.get_in_touch }}</a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:18px;">الأسعار المعروضة تقديرية ولا تشمل أي إضافات أو تخصيصات خاصة يتم الاتفاق عليها بشكل منفصل.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== COMPARISON TABLE (من لوحة التحكم — الأعمدة ديناميكية بحسب باقات الأسعار الفعلية) ===== -->
+  {% if pricingCompareRows is defined and pricingCompareRows|length > 0 and pricing|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> {{ pricingCompare.eyebrow|default('مقارنة تفصيلية') }}</div>
+        <h2>{{ pricingCompare.title|default('أي باقة تناسب فريقكم؟') }}</h2>
+        <p>{{ pricingCompare.description|default('مقارنة سريعة لأبرز الفروقات بين الباقات.') }}</p>
+      </div>
+      <div class="compare compare-plans" style="--compare-cols:{{ pricing|length }};">
+        <div class="compare-row compare-head">
+          <div>الميزة</div>
+          {% for plan in pricing %}<div class="cell">{{ plan.name }}</div>{% endfor %}
+        </div>
+        {% for row in pricingCompareRows %}
+        <div class="compare-row">
+          <div>{{ row.feature }}</div>
+          {% for plan in pricing %}
+          <div class="cell {% if row.values[plan.id] == '✓' %}cell-yes{% elseif row.values[plan.id] == '✕' %}cell-no{% endif %}">{{ row.values[plan.id] }}</div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== PRICING FAQ ===== -->
+  {% if pricing_faqs is defined and pricing_faqs|length > 0 %}
+  <section id="pricing-faq">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> أسئلة شائعة عن الأسعار</div>
+        <h2>كل ما يخص التسعير والفوترة</h2>
+      </div>
+      <div class="faq">
+        {% for item in pricing_faqs %}
+        <details{% if loop.first %} open{% endif %}>
+          <summary>{{ item.q }}</summary>
+          <p>{{ item.a }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== CTA ===== -->
+  {% if moduleEnabled('contact') %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="cta">
+        <h2>لم تجد الباقة المناسبة؟</h2>
+        <p>تواصل معنا وسنرسل لك عرض سعر مخصص يناسب احتياجك.</p>
+        <div class="cta-ctas">
+          <a class="btn btn-white" href="{{ siteUrl }}#contact">تواصل معنا</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+{% endblock %}

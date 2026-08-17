@@ -1,0 +1,187 @@
+{% extends "base.twig" %}
+
+{% set page_title = blog.name %}
+{% set subPageDescription = blog.description|striptags|slice(0, 160) %}
+{% set og_url = routes.blog ~ "/" ~ blog.slug %}
+{% set basicIMG = blog.image %}
+{% set page_type = "article" %}
+{% set nav_active = "blog" %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ siteUrl }}">{{ lang.home }}</a>
+      <span class="sep">/</span>
+      <a href="{{ siteUrl }}{{ routes.blog }}">{{ currentLang == 'en' ? 'News' : 'الأخبار' }}</a>
+      <span class="sep">/</span>
+      <span class="current">{{ blog.name }}</span>
+    </div>
+
+    <!-- ===== ARTICLE HEAD (sport-branded — distinct from the generic corporate article header) ===== -->
+    <div class="sport-article-head">
+      {% if blog.category %}<span class="sport-cat-tag">{{ blog.category }}</span>{% endif %}
+      <h1>{{ blog.name }}</h1>
+      <div class="sport-article-meta">
+        <span class="sport-meta-chip"><span class="avatar">{{ siteName|slice(0,2) }}</span> {{ siteName }}</span>
+        {% if blog.date %}<span class="sport-meta-chip">{{ blog.date|date('d/m/Y') }}</span>{% endif %}
+        {% if blog.reading_time is defined %}<span class="sport-meta-chip">{{ blog.reading_time }} {{ currentLang == 'en' ? 'min read' : 'دقائق قراءة' }}</span>{% endif %}
+        {% if blog.views is defined %}<span class="sport-meta-chip">{{ blog.views }} {{ lang.views|default('views') }}</span>{% endif %}
+      </div>
+    </div>
+
+    <!-- ===== MATCH SUMMARY BOX (optional — only if the article is tagged with a related match) ===== -->
+    {% if related_match is defined and related_match is not null %}
+    <a class="match-summary-box match-status-{{ related_match.match_status }}" href="{{ siteUrl }}#matches">
+      <div class="match-summary-top">
+        {% if related_match.competition %}<span class="match-competition">{{ related_match.competition }}</span>{% endif %}
+        {% if related_match.match_status == 'live' %}
+        <span class="match-badge live">{{ currentLang == 'en' ? 'Live Now' : 'مباشر الآن' }}</span>
+        {% elseif related_match.match_status == 'finished' %}
+        <span class="match-badge finished">{{ currentLang == 'en' ? 'Finished' : 'انتهت' }}</span>
+        {% else %}
+        <span class="match-badge upcoming">{{ related_match.date_human }}</span>
+        {% endif %}
+      </div>
+      <div class="match-summary-teams">
+        <div class="match-summary-team">
+          {% if related_match.team_home_logo %}<img src="{{ related_match.team_home_logo }}" alt="{{ related_match.team_home }}" loading="lazy">{% endif %}
+          <span>{{ related_match.team_home }}</span>
+        </div>
+        <div class="match-summary-center">
+          {% if related_match.match_status == 'upcoming' %}
+          <span class="match-vs">VS</span>
+          {% else %}
+          <span class="match-score">{{ related_match.score_home }} - {{ related_match.score_away }}</span>
+          {% endif %}
+        </div>
+        <div class="match-summary-team">
+          {% if related_match.team_away_logo %}<img src="{{ related_match.team_away_logo }}" alt="{{ related_match.team_away }}" loading="lazy">{% endif %}
+          <span>{{ related_match.team_away }}</span>
+        </div>
+      </div>
+      {% if related_match.venue or related_match.broadcast_channel %}
+      <div class="match-foot">
+        {% if related_match.venue %}<span class="match-venue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ related_match.venue }}</span>{% endif %}
+        {% if related_match.broadcast_channel %}<span class="match-broadcast"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><polygon points="10 10 15 12.5 10 15"/></svg>{{ related_match.broadcast_channel }}</span>{% endif %}
+      </div>
+      {% endif %}
+    </a>
+    {% endif %}
+
+    {% set hasSidebarAds = moduleEnabled('ads') and ads_sidebar is defined and ads_sidebar|length > 0 %}
+    <div class="{{ hasSidebarAds ? 'article-layout' : '' }}">
+      <div class="article-main">
+
+        {% if blog.image %}
+        <div class="sport-article-image">
+          <img src="{{ blog.image }}" alt="{{ blog.name }}" loading="lazy">
+        </div>
+        {% endif %}
+
+        <!-- ===== ARTICLE BODY — dedicated sports reading column/typography ===== -->
+        <article class="sport-article-body">
+          {{ blog.description|raw }}
+        </article>
+
+        {% if moduleEnabled('ads') and ads_article is defined and ads_article|length > 0 %}
+        <!-- ===== AD: ARTICLE INLINE ===== -->
+        <div class="ad-zone ad-zone-inline">
+          <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+          <div class="ad-row">
+            {% for ad in ads_article %}
+            <div class="ad-card">
+              {% if ad.type == 'code' %}{{ ad.code|raw }}
+              {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+              {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+              {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+              {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if blog.tags and blog.tags|length > 0 and blog.tags[0] %}
+        <div class="sport-tag-row">
+          {% for tag in blog.tags %}
+          <a class="tag-chip" href="{{ siteUrl }}{{ routes.search }}?search={{ tag|trim|url_encode }}">{{ tag|trim }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+
+        <div class="share-row sport-share-row">
+          <span class="label">{{ lang.share|default('شارك المقال:') }}</span>
+          <a class="social-btn" href="https://x.com/intent/tweet?url={{ siteUrl ~ og_url }}&text={{ blog.name }}" target="_blank" rel="noopener" aria-label="X">
+            <svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+          </a>
+          <a class="social-btn" href="https://www.linkedin.com/sharing/share-offsite/?url={{ siteUrl ~ og_url }}" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg>
+          </a>
+          <a class="social-btn" href="https://wa.me/?text={{ blog.name }}%20{{ siteUrl ~ og_url }}" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg>
+          </a>
+          <button class="social-btn" id="copyLinkBtn" type="button" aria-label="{{ lang.copy_link|default('نسخ الرابط') }}">
+            <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.36-1.36"/></svg>
+          </button>
+        </div>
+
+        <!-- ===== AUTHOR BOX ===== -->
+        <div class="sport-author-box">
+          <div class="avatar">{{ siteName|slice(0,2) }}</div>
+          <div>
+            <div class="name">{{ currentLang == 'en' ? "The " ~ siteName ~ " team" : "فريق " ~ siteName }}</div>
+            <div class="role">{{ currentLang == 'en' ? 'Sports Desk' : 'قسم التحرير الرياضي' }}</div>
+          </div>
+        </div>
+
+      </div>
+
+      {% if hasSidebarAds %}
+      <!-- ===== AD: BLOG SIDEBAR ===== -->
+      <aside class="article-aside">
+        <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+        {% for ad in ads_sidebar %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </aside>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if related is defined and related|length > 0 %}
+  <!-- ===== RELATED ===== -->
+  <div class="related-wrap">
+    <div class="container">
+      <div class="related-head">
+        <div class="eyebrow"><span class="dot"></span> {{ lang.related_articles|default('مقالات ذات صلة') }}</div>
+        <h2>{{ lang.keep_reading|default('تابع القراءة') }}</h2>
+      </div>
+      <div class="blog-grid">
+        {% for post in related %}
+        <a class="blog-card" href="{{ post.url }}">
+          <div class="thumb">
+            {% if post.image %}<img src="{{ post.image }}" alt="{{ post.name }}" loading="lazy">{% else %}
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {% endif %}
+          </div>
+          <div class="body">
+            <h3>{{ post.name }}</h3>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+{% endblock %}

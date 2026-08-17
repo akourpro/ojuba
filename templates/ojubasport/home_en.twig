@@ -1,0 +1,459 @@
+{% extends "base.twig" %}
+
+{% set page_title = siteName %}
+{% set subPageDescription = siteDescription %}
+{% set nav_active = "home" %}
+
+{% block content %}
+
+  {% if moduleEnabled('ads') and ads_home_top is defined and ads_home_top|length > 0 %}
+  <!-- ===== AD: HOME TOP ===== -->
+  <div class="ad-zone ad-zone-top">
+    <div class="container">
+      <div class="ad-eyebrow">Advertisement</div>
+      <div class="ad-row">
+        {% for ad in ads_home_top %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== SCORES DASHBOARD — the theme's landing surface, ahead of the news feed ===== -->
+  {% if moduleEnabled('matches') and matches is defined and matches|length > 0 %}
+  <section id="matches" class="scores-hero">
+    <div class="container">
+      <div class="section-head scores-hero-head">
+        <div class="eyebrow"><span class="dot"></span> Live Now</div>
+        <h1>Scores &amp; Match Schedule</h1>
+        <div class="scores-live-status">
+          <span id="scoresLastUpdated" data-label-now="Updated just now" data-label-ago="Updated {s}s ago">Updated just now</span>
+          <button type="button" id="scoresRefreshBtn" aria-label="Refresh scores"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+        </div>
+      </div>
+
+      <div class="scores-dashboard" id="scoresDashboard" data-lang="en" data-site-url="{{ siteUrl }}" data-matches-route="{{ routes.matches }}">
+        {% set spot = matches[0] %}
+        <a class="spotlight-match match-status-{{ spot.match_status }}" data-match-id="{{ spot.id }}" href="{{ siteUrl }}{{ routes.matches }}/{{ spot.id }}">
+          <div class="match-top">
+            {% if spot.competition %}<span class="match-competition">{{ spot.competition }}</span>{% endif %}
+            {% if spot.match_status == 'live' %}
+            <span class="match-badge live">Live Now</span>
+            {% elseif spot.match_status == 'finished' %}
+            <span class="match-badge finished">Finished</span>
+            {% else %}
+            <span class="match-badge upcoming">{{ spot.date_human }}</span>
+            {% endif %}
+          </div>
+          <div class="spotlight-teams">
+            <div class="spotlight-team">
+              {% if spot.team_home_logo %}<img src="{{ spot.team_home_logo }}" alt="{{ spot.team_home }}" loading="lazy">{% endif %}
+              <span>{{ spot.team_home }}</span>
+            </div>
+            <div class="spotlight-center">
+              {% if spot.match_status == 'upcoming' %}
+              <span class="spotlight-vs">VS</span>
+              <span class="spotlight-time">{{ spot.date_human }}</span>
+              {% else %}
+              <span class="spotlight-score">{{ spot.score_home }} - {{ spot.score_away }}</span>
+              {% endif %}
+            </div>
+            <div class="spotlight-team">
+              {% if spot.team_away_logo %}<img src="{{ spot.team_away_logo }}" alt="{{ spot.team_away }}" loading="lazy">{% endif %}
+              <span>{{ spot.team_away }}</span>
+            </div>
+          </div>
+          {% if spot.venue or spot.broadcast_channel %}
+          <div class="match-foot">
+            {% if spot.venue %}<span class="match-venue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ spot.venue }}</span>{% endif %}
+            {% if spot.broadcast_channel %}<span class="match-broadcast"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><polygon points="10 10 15 12.5 10 15"/></svg>{{ spot.broadcast_channel }}</span>{% endif %}
+          </div>
+          {% endif %}
+        </a>
+
+        <div class="scores-list">
+          <div class="scores-list-head">Other Matches</div>
+          <div class="scores-list-body" id="scoresListBody">
+            {% if matches|length > 1 %}
+            <div class="scores-list-rows">
+              {% for m in matches|slice(1) %}
+              <a class="score-row" data-match-id="{{ m.id }}" href="{{ siteUrl }}{{ routes.matches }}/{{ m.id }}">
+                <span class="score-row-status status-{{ m.match_status }}"></span>
+                <div class="score-row-main">
+                  <div class="score-row-teams">
+                    <span>{{ m.team_home }}</span>
+                    <span class="score-row-score">
+                      {% if m.match_status == 'upcoming' %}VS{% else %}{{ m.score_home }}-{{ m.score_away }}{% endif %}
+                    </span>
+                    <span>{{ m.team_away }}</span>
+                  </div>
+                  <div class="score-row-meta">
+                    {% if m.competition %}<span>{{ m.competition }}</span>{% endif %}
+                    <span>{% if m.match_status == 'live' %}Live Now{% elseif m.match_status == 'finished' %}Finished{% else %}{{ m.date_human }}{% endif %}</span>
+                  </div>
+                </div>
+              </a>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="scores-list-empty">No other matches scheduled right now.</p>
+            {% endif %}
+          </div>
+          {% if moduleEnabled('standings') and standings is defined and standings|length > 0 %}
+          <a href="#standings" class="btn btn-ghost btn-sm scores-list-cta">View full standings</a>
+          {% endif %}
+        </div>
+      </div>
+      <p class="scores-archive-link"><a href="{{ siteUrl }}{{ routes.matches }}">{{ currentLang == 'en' ? 'View all matches' : 'عرض كل المباريات' }}</a></p>
+    </div>
+  </section>
+  <script src="{{ templatePath }}/assets/js/live-scores.js"></script>
+  {% endif %}
+
+  <!-- ===== STANDINGS (standings module) ===== -->
+  {% if moduleEnabled('standings') and standings is defined and standings|length > 0 %}
+  <section id="standings" style="background:var(--surface);border-top:1px solid var(--outline);border-bottom:1px solid var(--outline);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> League Table</div>
+        <h2>Standings</h2>
+      </div>
+      <div class="standings-table-wrap">
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th>P</th>
+              <th>W</th>
+              <th>D</th>
+              <th>L</th>
+              <th>GD</th>
+              <th>Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in standings %}
+            <tr{% if loop.index <= 3 %} class="top-rank"{% endif %}>
+              <td>{{ loop.index }}</td>
+              <td class="standings-team">
+                {% if team.team_logo %}<img src="{{ team.team_logo }}" alt="{{ team.team_name }}" loading="lazy">{% endif %}
+                <span>{{ team.team_name }}</span>
+              </td>
+              <td>{{ team.played }}</td>
+              <td>{{ team.won }}</td>
+              <td>{{ team.drawn }}</td>
+              <td>{{ team.lost }}</td>
+              <td>{{ team.goal_diff > 0 ? '+' ~ team.goal_diff : team.goal_diff }}</td>
+              <td class="pts">{{ team.points }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if moduleEnabled('blogs') and news_latest is defined and news_latest|length > 0 %}
+  {% if tickerEnabled %}
+  <!-- ===== BREAKING TICKER ===== -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span class="ticker-label">Breaking</span>
+      <div class="ticker-track">
+        <div class="ticker-items" style="animation-duration: {{ tickerSpeed }}s;">
+          {% for item in news_latest|slice(0, 5) %}
+          <a href="{{ item.url }}">{{ item.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== NEWS GRID + SIDEBAR ===== -->
+  <section id="news" class="news-main">
+    <div class="container">
+      <div class="section-head" style="text-align:left;">
+        <div class="eyebrow"><span class="dot"></span> News</div>
+        <h2>Latest Sports News</h2>
+      </div>
+
+      <a class="news-top-story" href="{{ news_latest[0].url }}">
+        <div class="news-top-thumb">
+          {% if news_latest[0].image %}<img src="{{ news_latest[0].image }}" alt="{{ news_latest[0].name }}" loading="lazy">{% endif %}
+          {% if news_latest[0].featured %}<span class="breaking-pill">Breaking</span>{% elseif news_latest[0].category_name %}<span class="cat-pill">{{ news_latest[0].category_name }}</span>{% endif %}
+        </div>
+        <div class="news-top-body">
+          <h3>{{ news_latest[0].name }}</h3>
+          {% if news_latest[0].description %}<p>{{ news_latest[0].description }}…</p>{% endif %}
+          <div class="meta-row">
+            {% if news_latest[0].date_human %}<span>{{ news_latest[0].date_human }}</span>{% endif %}
+            {% if news_latest[0].reading_time %}<span>{{ news_latest[0].reading_time }} min read</span>{% endif %}
+          </div>
+        </div>
+      </a>
+
+      <div class="news-main-grid">
+
+        <div class="news-col">
+          {% if news_categories is defined and news_categories|length > 0 %}
+          <div class="chip-row">
+            {% for cat in news_categories %}
+            <a class="chip" href="{{ cat.url }}">{{ cat.name }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if news_latest|length > 1 %}
+          <div class="news-grid">
+            {% for item in news_latest|slice(1, 8) %}
+            <a class="news-card reveal" href="{{ item.url }}">
+              <div class="thumb">
+                {% if item.image %}
+                <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+                {% else %}
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                {% endif %}
+                {% if item.featured %}<span class="breaking-pill sm">Breaking</span>{% elseif item.category_name %}<span class="cat-pill sm">{{ item.category_name }}</span>{% endif %}
+              </div>
+              <div class="body">
+                <h3>{{ item.name }}</h3>
+                {% if item.date_human %}<span class="secondary-date">{{ item.date_human }}</span>{% endif %}
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <p style="text-align:center;margin-top:26px;"><a href="{{ siteUrl }}{{ routes.blog }}" class="btn btn-ghost">Browse all news</a></p>
+        </div>
+
+        <aside class="news-aside">
+          {% if news_trending is defined and news_trending|length > 0 %}
+          <div class="aside-box">
+            <h4>Most Read</h4>
+            <div class="trending-list">
+              {% for item in news_trending %}
+              <a class="trending-item" href="{{ item.url }}">
+                <span class="rank">{{ loop.index }}</span>
+                <span class="t-name">{{ item.name }}</span>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if moduleEnabled('mailing') %}
+          <div class="aside-box aside-newsletter">
+            <h4>Newsletter</h4>
+            <p>Top stories delivered to your inbox first.</p>
+            <form class="newsletter-form-v" id="newsletterForm">
+              <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+                <label for="newsletterWebsite">Website</label>
+                <input type="text" id="newsletterWebsite" tabindex="-1" autocomplete="off">
+              </div>
+              <input type="email" id="newsletterEmail" placeholder="{{ lang.email }}" required>
+              <button type="submit" class="btn btn-primary">{{ lang.send_message|default('Subscribe') }}</button>
+            </form>
+            <div class="newsletter-note" id="newsletterNote" data-success-text="{{ lang.newsletter_subscribed_success|default('Subscribed successfully!') }}">{{ lang.newsletter_privacy_note|default("We'll never share your email.") }}</div>
+          </div>
+          {% endif %}
+
+          {% if moduleEnabled('contact') %}
+          <div class="aside-box">
+            <h4>Get in touch</h4>
+            {% if site_mail %}<a class="row" href="mailto:{{ site_mail }}"><svg viewBox="0 0 24 24"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><span>{{ site_mail }}</span></a>{% endif %}
+            {% if whatsapp_number %}<a class="row" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg><span>{{ lang.whatsapp }}</span></a>{% endif %}
+            <a class="row" href="{{ siteUrl }}{{ routes.contact }}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ lang.contact_us }}</span></a>
+          </div>
+          {% endif %}
+        </aside>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if moduleEnabled('ads') and ads_home_between is defined and ads_home_between|length > 0 %}
+  <!-- ===== AD: HOME BETWEEN ===== -->
+  <div class="ad-zone ad-zone-between">
+    <div class="container">
+      <div class="ad-eyebrow">Advertisement</div>
+      <div class="ad-row">
+        {% for ad in ads_home_between %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== VIDEOS & HIGHLIGHTS (videos module) ===== -->
+  {% if moduleEnabled('videos') and videos is defined and videos|length > 0 %}
+  <section id="videos">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> Videos</div>
+        <h2>Highlights &amp; Video Clips</h2>
+      </div>
+      <div class="videos-grid">
+        {% for v in videos %}
+        <a class="video-card" href="{{ v.embed_url ?: v.youtube_url }}" target="_blank" rel="noopener">
+          <div class="video-thumb">
+            {% if v.thumbnail %}<img src="{{ v.thumbnail }}" alt="{{ v.title }}" loading="lazy">{% endif %}
+            <span class="video-play"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16"/></svg></span>
+          </div>
+          <h3>{{ v.title }}</h3>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== STATS ===== -->
+  {% if moduleEnabled('stats') and stats is defined and stats|length > 0 %}
+  <section style="background:var(--surface);border-top:1px solid var(--outline);border-bottom:1px solid var(--outline);">
+    <div class="container">
+      <div class="stats-bar">
+        {% for stat in stats %}
+        <div class="stat-item">
+          {% if stat.icon %}<div class="ic"><i class="{{ stat.icon }}"></i></div>{% endif %}
+          <div class="num">{{ stat.number }}{{ stat.suffix }}</div>
+          <div class="label">{{ stat.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== SPONSORS / PARTNERS (clients module) ===== -->
+  {% if moduleEnabled('clients') and clients is defined and clients|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> Sponsored By</div>
+        <h2>Our Partners &amp; Sponsors</h2>
+      </div>
+      <div class="clients-strip">
+        {% for client in clients %}
+        {% if client.url %}
+        <a href="{{ client.url }}" target="_blank" rel="nofollow"><img src="{{ client.logo }}" alt="{{ client.name }}" loading="lazy"></a>
+        {% else %}
+        <img src="{{ client.logo }}" alt="{{ client.name }}" loading="lazy">
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== SPORTS WRITERS (team module) ===== -->
+  {% if moduleEnabled('team') and team is defined and team|length > 0 %}
+  <section id="team">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> Editorial Team</div>
+        <h2>Our Sports Writers</h2>
+        <p>The writers and analysts responsible for covering the news and matches.</p>
+      </div>
+      <div class="team-grid">
+        {% for member in team %}
+        <div class="team-card">
+          {% if member.image is defined and member.image != "" and member.image is not empty %}
+          <div class="team-avatar"><img src="{{ member.image }}" alt="{{ member.name }}" loading="lazy"></div>
+          {% else %}
+          <div class="team-avatar"><img src="files/images/avatar.png" alt="{{ member.name }}" loading="lazy"></div>
+          {% endif %}
+          <h3>{{ member.name }}</h3>
+          {% if member.position %}<div class="team-role">{{ member.position }}</div>{% endif %}
+          {% if member.bio %}<div class="team-bio">{{ member.bio|raw }}</div>{% endif %}
+          {% if member.facebook or member.twitter or member.linkedin or member.whatsapp or member.website or member.phone or member.instagram or member.snapchat %}
+          <div class="team-social">
+            {% if member.facebook %}<a href="{{ member.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>{% endif %}
+            {% if member.twitter %}<a href="{{ member.twitter }}" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg></a>{% endif %}
+            {% if member.linkedin %}<a href="{{ member.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg></a>{% endif %}
+            {% if member.instagram %}<a href="{{ member.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg></a>{% endif %}
+            {% if member.snapchat %}<a href="{{ member.snapchat }}" target="_blank" rel="noopener" aria-label="Snapchat"><svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.2-5 5.2 0 1 .1 1.9.3 2.7-1 .3-2 .9-2.7 1.7-.2.3 0 .7.4.7.6 0 1.2-.1 1.7-.3.1.7.4 1.3.8 1.8-.5.4-1.2.8-2 1-.4.1-.4.7 0 .9 1 .5 2.3.8 3.5.9.5.7 1.6 1.2 3 1.2s2.5-.5 3-1.2c1.2-.1 2.5-.4 3.5-.9.4-.2.4-.8 0-.9-.8-.2-1.5-.6-2-1 .4-.5.7-1.1.8-1.8.5.2 1.1.3 1.7.3.4 0 .6-.4.4-.7-.7-.8-1.7-1.4-2.7-1.7.2-.8.3-1.7.3-2.7C17 5.2 15 3 12 3z"/></svg></a>{% endif %}
+            {% if member.whatsapp %}<a href="https://wa.me/{{ member.whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg></a>{% endif %}
+            {% if member.phone %}<a href="tel:{{ member.phone }}" aria-label="Phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>{% endif %}
+            {% if member.website %}<a href="{{ member.website }}" target="_blank" rel="noopener" aria-label="Website"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== OFFICES ===== -->
+  {% if moduleEnabled('branches') and branches is defined and branches|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> Our Offices</div>
+        <h2>Wherever you are, our news reaches you</h2>
+      </div>
+      <div class="branches-grid">
+        {% for branch in branches %}
+        <div class="branch-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+          <h3>{{ branch.name }}</h3>
+          {% if branch.address %}
+          <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ branch.address }}</span></div>
+          {% endif %}
+          {% if branch.phone %}
+          <a class="row" href="tel:{{ branch.phone }}"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>{{ branch.phone }}</span></a>
+          {% endif %}
+          {% if branch.email %}
+          <a class="row" href="mailto:{{ branch.email }}"><svg viewBox="0 0 24 24"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><span>{{ branch.email }}</span></a>
+          {% endif %}
+          {% if branch.working_hours %}
+          <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ branch.working_hours }}</span></div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== FAQ ===== -->
+  {% if moduleEnabled('faq') and faqs is defined and faqs|length > 0 %}
+  <section id="faq">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> FAQ</div>
+        <h2>Frequently asked questions</h2>
+      </div>
+      <div class="faq">
+        {% for item in faqs %}
+        <details{% if loop.first %} open{% endif %}>
+          <summary>{{ item.question }}</summary>
+          <p>{{ item.answer|striptags }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+{% endblock %}

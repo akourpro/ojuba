@@ -1,0 +1,504 @@
+{% extends "base.twig" %}
+
+{% set page_title = siteName %}
+{% set subPageDescription = siteDescription %}
+{% set nav_active = "home" %}
+
+{% block content %}
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-kicker">{{ siteName }}</div>
+      <h1>شريكك الموثوق لتحقيق نتائج حقيقية</h1>
+      <p>نجمع لك الخبرة والجودة في مكان واحد، بحلول مصمَّمة فعلاً حول احتياجك — بدل حلول جاهزة عامة لا تناسب الجميع.</p>
+      <div class="hero-ctas">
+        {% if moduleEnabled('contact') %}<a class="btn btn-white" href="{{ siteUrl }}#contact">تواصل معنا الآن</a>{% endif %}
+        <a class="btn btn-ghost" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff;" href="{{ siteUrl }}#features">تعرّف على مميزاتنا</a>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-trust">
+        <span>جودة مضمونة</span>
+        <span>التزام بالمواعيد</span>
+        <span>استشارة أولى مجانية</span>
+      </div>
+    </div>
+  </section>
+
+  {% if moduleEnabled('ads') and ads_home_top is defined and ads_home_top|length > 0 %}
+  <!-- ===== AD: HOME TOP ===== -->
+  <div class="ad-zone ad-zone-top">
+    <div class="container">
+      <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+      <div class="ad-row">
+        {% for ad in ads_home_top %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== STATS (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('stats') and stats is defined and stats|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="stats-bar">
+        {% for stat in stats %}
+        <div class="stat-item">
+          {% if stat.icon %}<div class="ic"><i class="{{ stat.icon }}"></i></div>{% endif %}
+          <div class="num">{{ stat.number }}{{ stat.suffix }}</div>
+          <div class="label">{{ stat.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== FEATURES / WHY US ===== -->
+  <section id="features" class="features-wrap">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> مميزاتنا</div>
+        <h2>لماذا يختارنا عملاؤنا</h2>
+        <p>مجموعة من المزايا التي تجعل التعامل معنا أسهل وأكثر ثقة.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <h3>التزام بالمواعيد</h3>
+          <p>نخطط لكل عمل بعناية وننفّذه في الوقت المتفق عليه دون تأخير.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div>
+          <h3>جودة مضمونة</h3>
+          <p>معايير جودة واضحة في كل مرحلة من مراحل العمل، من البداية حتى التسليم.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>فريق متخصص</h3>
+          <p>فريق عمل ذو خبرة حقيقية، يتابع مشروعك خطوة بخطوة حتى النهاية.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <h3>دعم مستمر</h3>
+          <p>نبقى معك بعد التسليم أيضاً، للإجابة عن أي استفسار أو متابعة أي تحديث.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+          <h3>حلول مخصصة</h3>
+          <p>لا نقدّم حلولاً جاهزة عامة — كل عمل يُبنى فعلاً حول احتياجك أنت.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg></div>
+          <h3>أسعار واضحة</h3>
+          <p>تسعير شفاف بلا رسوم مخفية، تعرف بالضبط ما الذي تدفع مقابله.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SERVICES (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('services') and services is defined and services|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> خدماتنا</div>
+        <h2>خدمات نقدّمها لعملائنا</h2>
+        <p>مجموعة الخدمات التي نساعد بها عملاءنا على تحقيق أهدافهم.</p>
+      </div>
+      <div class="blog-grid">
+        {% for service in services|slice(0, 6) %}
+        <a class="blog-card reveal" href="{{ service.url }}">
+          <div class="thumb">
+            {% if service.image %}
+            <img src="{{ service.image }}" alt="{{ service.name }}" loading="lazy">
+            {% else %}
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {% endif %}
+          </div>
+          <div class="body">
+            <h3>{{ service.name }}</h3>
+            {% if service.description %}<p class="excerpt">{{ service.description|striptags|slice(0, 90) }}…</p>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% if services|length > 6 %}
+      <p style="text-align:center;margin-top:22px;"><a href="{{ siteUrl }}{{ routes.service }}" style="font-weight:800;color:var(--primary);">عرض كل الخدمات ←</a></p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== PORTFOLIO (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('portfolio') and (portfolios is defined and portfolios|length > 0) %}
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> أعمالنا</div>
+        <h2>نماذج من أعمالنا</h2>
+        <p>مجموعة مختارة من المشاريع التي أنجزناها لعملائنا.</p>
+      </div>
+      <div class="blog-grid">
+        {% for item in portfolios|slice(0, 6) %}
+        <a class="blog-card reveal" href="{{ siteUrl }}{{ routes.portfolio }}/{{ item.slug }}">
+          <div class="thumb">
+            {% if item.image %}
+            <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+            {% else %}
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {% endif %}
+          </div>
+          <div class="body">
+            {% if item.category %}<span class="cat-tag">{{ item.category }}</span>{% endif %}
+            <h3>{{ item.name }}</h3>
+            {% if item.description %}<p class="excerpt">{{ item.description|striptags|slice(0, 90) }}…</p>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      <p style="text-align:center;margin-top:22px;"><a href="{{ siteUrl }}{{ routes.portfolio }}" style="font-weight:800;color:var(--primary);">عرض كل الأعمال ←</a></p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if moduleEnabled('ads') and ads_home_between is defined and ads_home_between|length > 0 %}
+  <!-- ===== AD: HOME BETWEEN ===== -->
+  <div class="ad-zone ad-zone-between">
+    <div class="container">
+      <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+      <div class="ad-row">
+        {% for ad in ads_home_between %}
+        <div class="ad-card">
+          {% if ad.type == 'code' %}{{ ad.code|raw }}
+          {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+          {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+          {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+          {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if moduleEnabled('team') and team is defined and team|length > 0 %}
+  <section id="team">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> فريق العمل</div>
+        <h2>الأشخاص خلف {{ siteName }}</h2>
+        <p>تعرّف على فريق العمل المسؤول عن تقديم خدماتنا لك.</p>
+      </div>
+      <div class="team-grid">
+        {% for member in team %}
+        <div class="team-card">
+          {% if member.image is defined and member.image != "" and member.image is not empty %}
+          <div class="team-avatar"><img src="{{ member.image }}" alt="{{ member.name }}" loading="lazy"></div>
+          {% else %}
+          <div class="team-avatar"><img src="files/images/avatar.png" alt="{{ member.name }}" loading="lazy"></div>
+          {% endif %}
+          <h3>{{ member.name }}</h3>
+          {% if member.position %}<div class="team-role">{{ member.position }}</div>{% endif %}
+          {% if member.bio %}<div class="team-bio">{{ member.bio|raw }}</div>{% endif %}
+          {% if member.facebook or member.twitter or member.linkedin or member.whatsapp or member.website or member.phone or member.instagram or member.snapchat %}
+          <div class="team-social">
+            {% if member.facebook %}<a href="{{ member.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>{% endif %}
+            {% if member.twitter %}<a href="{{ member.twitter }}" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg></a>{% endif %}
+            {% if member.linkedin %}<a href="{{ member.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg></a>{% endif %}
+            {% if member.instagram %}<a href="{{ member.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg></a>{% endif %}
+            {% if member.snapchat %}<a href="{{ member.snapchat }}" target="_blank" rel="noopener" aria-label="Snapchat"><svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.2-5 5.2 0 1 .1 1.9.3 2.7-1 .3-2 .9-2.7 1.7-.2.3 0 .7.4.7.6 0 1.2-.1 1.7-.3.1.7.4 1.3.8 1.8-.5.4-1.2.8-2 1-.4.1-.4.7 0 .9 1 .5 2.3.8 3.5.9.5.7 1.6 1.2 3 1.2s2.5-.5 3-1.2c1.2-.1 2.5-.4 3.5-.9.4-.2.4-.8 0-.9-.8-.2-1.5-.6-2-1 .4-.5.7-1.1.8-1.8.5.2 1.1.3 1.7.3.4 0 .6-.4.4-.7-.7-.8-1.7-1.4-2.7-1.7.2-.8.3-1.7.3-2.7C17 5.2 15 3 12 3z"/></svg></a>{% endif %}
+            {% if member.whatsapp %}<a href="https://wa.me/{{ member.whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg></a>{% endif %}
+            {% if member.phone %}<a href="tel:{{ member.phone }}" aria-label="Phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>{% endif %}
+            {% if member.website %}<a href="{{ member.website }}" target="_blank" rel="noopener" aria-label="Website"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== CLIENTS + TESTIMONIALS (بيانات حقيقية من لوحة التحكم) ===== -->
+  {% if (moduleEnabled('clients') and clients is defined and clients|length > 0) or (moduleEnabled('testimonials') and testimonials is defined and testimonials|length > 0) %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> عملاؤنا</div>
+        <h2>ماذا يقول عملاؤنا؟</h2>
+      </div>
+
+      {% if moduleEnabled('clients') and clients is defined and clients|length > 0 %}
+      <div class="clients-label">موثوق من عملاء في</div>
+      <div class="clients-strip">
+        {% for client in clients %}
+        {% if client.url %}
+        <a href="{{ client.url }}" target="_blank" rel="nofollow"><img src="{{ client.logo }}" alt="{{ client.name }}" loading="lazy"></a>
+        {% else %}
+        <img src="{{ client.logo }}" alt="{{ client.name }}" loading="lazy">
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if moduleEnabled('testimonials') and testimonials is defined and testimonials|length > 0 %}
+      <div class="testimonials">
+        {% for item in testimonials %}
+        <div class="testimonial-card">
+          {% if item.rating %}<div class="rating">{% for i in 1..item.rating %}★{% endfor %}</div>{% endif %}
+          <p class="quote">"{{ item.content|striptags }}"</p>
+          <div class="author">
+            <div class="avatar">{% if item.image %}<img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">{% else %}{{ item.name|slice(0,1) }}{% endif %}</div>
+            <div>
+              <div class="name">{{ item.name }}</div>
+              {% if item.position %}<div class="role">{{ item.position }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== BRANCHES (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('branches') and branches is defined and branches|length > 0 %}
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> فروعنا</div>
+        <h2>أينما كنت، نحن قريبون منك</h2>
+      </div>
+      <div class="branches-grid">
+        {% for branch in branches %}
+        <div class="branch-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+          <h3>{{ branch.name }}</h3>
+          {% if branch.address %}
+          <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ branch.address }}</span></div>
+          {% endif %}
+          {% if branch.phone %}
+          <a class="row" href="tel:{{ branch.phone }}"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>{{ branch.phone }}</span></a>
+          {% endif %}
+          {% if branch.email %}
+          <a class="row" href="mailto:{{ branch.email }}"><svg viewBox="0 0 24 24"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><span>{{ branch.email }}</span></a>
+          {% endif %}
+          {% if branch.working_hours %}
+          <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ branch.working_hours }}</span></div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== CERTIFICATES (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('certificates') and certificates is defined and certificates|length > 0 %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> شهاداتنا</div>
+        <h2>شهادات واعتمادات</h2>
+        <p>اعتمادات وشهادات تؤكد التزامنا بأعلى معايير الجودة.</p>
+      </div>
+      <div class="certs-grid">
+        {% for cert in certificates %}
+        <div class="cert-card">
+          {% if cert.image %}<div class="cert-img"><img src="{{ cert.image }}" alt="{{ cert.name }}" loading="lazy"></div>{% endif %}
+          <h3>{{ cert.name }}</h3>
+          {% if cert.issuer %}<div class="issuer">{{ cert.issuer }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== PRICING (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('pricing') and pricing is defined and pricing|length > 0 %}
+  <section id="pricing" style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> {{ lang.pricing }}</div>
+        <h2>{{ lang.our_plans }}</h2>
+      </div>
+      <div class="pricing-grid">
+        {% for plan in pricing %}
+        <div class="pricing-card{% if plan.is_featured %} featured{% endif %}">
+          {% if plan.is_featured %}<span class="pricing-badge">{{ lang.most_popular }}</span>{% endif %}
+          <h3>{{ plan.name }}</h3>
+          <div class="pricing-price">{{ plan.price }}<span>{{ plan.currency }}</span></div>
+          {% if plan.period %}<div class="pricing-period">/ {{ plan.period }}</div>{% endif %}
+          {% if plan.features|length > 0 %}
+          <ul class="pricing-features">
+            {% for feature in plan.features %}
+            <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> {{ feature }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if moduleEnabled('contact') %}
+          <a href="{{ siteUrl }}#contact" class="btn btn-block {% if plan.is_featured %}btn-primary{% else %}btn-ghost{% endif %}">{{ lang.get_in_touch }}</a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <p style="text-align:center;margin-top:22px;"><a href="{{ siteUrl }}pricing" style="font-weight:800;color:var(--primary);">مقارنة تفصيلية كاملة بين الباقات وأسئلة شائعة عن الأسعار ←</a></p>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== FAQ (من لوحة التحكم) ===== -->
+  {% if moduleEnabled('faq') and faqs is defined and faqs|length > 0 %}
+  <section id="faq">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> الأسئلة الشائعة</div>
+        <h2>أسئلة يتكرر سؤالنا عنها</h2>
+      </div>
+      <div class="faq">
+        {% for item in faqs %}
+        <details{% if loop.first %} open{% endif %}>
+          <summary>{{ item.question }}</summary>
+          <p>{{ item.answer|striptags }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== GET STARTED ===== -->
+  <section id="get-started" style="background:var(--bg);">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow"><span class="dot"></span> كيف تبدأ</div>
+        <h2>من أول تواصل إلى تسليم فعلي</h2>
+        <p>عملية بسيطة وواضحة، وتعرف بالضبط أين تقف في كل خطوة.</p>
+      </div>
+      <div class="flow">
+        <div class="flow-step"><div class="n">1</div><h3>تواصل معنا</h3><p>راسلنا عبر النموذج بالأسفل، ونرتب مكالمة قصيرة للتعرف على احتياجك.</p></div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-step"><div class="n">2</div><h3>نضع خطة العمل</h3><p>نوضّح لك التفاصيل والتسعير المناسب، ونتفق على خطوات التنفيذ.</p></div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-step"><div class="n">3</div><h3>نبدأ التنفيذ</h3><p>نباشر العمل فوراً ونبقيك على اطّلاع بكل تحديث حتى التسليم.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT / CTA ===== -->
+  {% if moduleEnabled('contact') %}
+  <section id="contact">
+    <div class="container">
+      <div class="cta">
+        <h2>لنبدأ العمل معاً</h2>
+        <p>يسعدنا الإجابة عن أي سؤال، وترتيب أول خطوة لمشروعك.</p>
+        <div class="cta-ctas">
+          {% if moduleEnabled('blogs') %}<a class="btn btn-white" href="{{ siteUrl }}{{ routes.blog }}">تصفّح المدونة</a>{% endif %}
+        </div>
+      </div>
+
+      <div class="contact-grid">
+        <form class="contact-form" id="contactForm" method="POST" novalidate>
+          <div class="section-head" style="text-align:right;margin:0 0 24px;max-width:none;">
+            <div class="eyebrow"><span class="dot"></span> نموذج التواصل</div>
+            <h2 style="font-size:22px;">راسلنا مباشرة</h2>
+          </div>
+
+          <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="form-row">
+            <label for="fname">{{ lang.first_name }}</label>
+            <input type="text" id="fname" name="fname" placeholder="اسمك الأول" required>
+          </div>
+          <div class="form-row">
+            <label for="lname">{{ lang.last_name }}</label>
+            <input type="text" id="lname" name="lname" placeholder="اسمك الأخير" required>
+          </div>
+          <div class="form-row">
+            <label for="phone">{{ lang.phone }}</label>
+            <input type="text" id="phone" name="phone" placeholder="05xxxxxxxx" required>
+          </div>
+          <div class="form-row">
+            <label for="email">{{ lang.email }}</label>
+            <input type="email" id="email" name="email" placeholder="you@company.com" required>
+          </div>
+          <div class="form-row">
+            <label for="message">{{ lang.message }}</label>
+            <textarea id="message" name="message" placeholder="أخبرنا عن احتياجك وسنعاود التواصل معك في أقرب وقت" required></textarea>
+          </div>
+          <input type="hidden" name="_csrf" id="csrf" value="{{ csrftoken }}">
+          <button type="button" id="sendMessage" class="btn btn-primary" style="width:100%;">إرسال الرسالة</button>
+          <div id="msgSubmit" style="margin-top:12px"></div>
+        </form>
+
+        <div class="contact-info">
+          {% if site_mail %}
+          <div class="info-card">
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
+            <div>
+              <div class="label">البريد الإلكتروني</div>
+              <a class="value" href="mailto:{{ site_mail }}">{{ site_mail }}</a>
+            </div>
+          </div>
+          {% endif %}
+          {% if whatsapp_number %}
+          <div class="info-card">
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div>
+              <div class="label">هاتف / واتساب</div>
+              <a class="value" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener">{{ whatsapp_number }}</a>
+            </div>
+          </div>
+          {% elseif site_phone %}
+          <div class="info-card">
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div>
+              <div class="label">الهاتف</div>
+              <a class="value" href="tel:{{ site_phone }}">{{ site_phone }}</a>
+            </div>
+          </div>
+          {% endif %}
+          {% if location %}
+          <div class="info-card">
+            <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div>
+              <div class="label">الموقع</div>
+              <span class="value">{{ location }}</span>
+            </div>
+          </div>
+          {% endif %}
+          {% if facebook or instagram or twitter or linkedin or youtube %}
+          <div class="social-box">
+            <div class="label">تابعنا</div>
+            <div class="social-row">
+              {% if twitter %}<a class="social-btn" href="https://x.com/{{ twitter }}" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg></a>{% endif %}
+              {% if instagram %}<a class="social-btn" href="https://instagram.com/{{ instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="0.6"/></svg></a>{% endif %}
+              {% if linkedin %}<a class="social-btn" href="https://linkedin.com/company/{{ linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg></a>{% endif %}
+              {% if whatsapp_number %}<a class="social-btn" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg></a>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="js/contact.js"></script>
+  {% endif %}
+
+{% endblock %}

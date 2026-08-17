@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="{{ lang.lang_code }}" dir="{{ lang.dir }}">
+
+<head>
+    <!-- ضع أكواد تتبّع الزوار الخاصة بموقعك هنا (Google Analytics / GTM / إلخ) —
+         هذا القالب الافتراضي لا يحمل أي حساب تتبّع مسبق مقصوداً. -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="_csrf" content="{{ csrftoken }}">
+
+    <base href="{{ siteUrl }}">
+    <title>{% if page_title is defined %}{{ page_title }} - {% endif %}{{ siteName }}</title>
+
+    <meta name="description" content="{% if subPageDescription is defined %}{{ subPageDescription }}{% else %}{{ siteDescription }}{% endif %}">
+    <meta name="keywords" content="{% if pageMetaTags is defined %}{{ pageMetaTags }}{% else %}{{ siteMetaTags }}{% endif %}">
+    <meta name="theme-color" content="#B3141E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+    {% if moduleEnabled('blogs') %}
+    <link rel="alternate" type="application/rss+xml" title="{{ lang.rss_feed_for }} {{ siteName }}" href="{{ siteUrl }}blogs.rss" />
+    {% endif %}
+    <link rel="canonical" href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}{% if currentLang == 'ar' %}?lang=ar{% endif %}" />
+	{% if languageMode == 'both' %}
+	<link rel="alternate" hreflang="en" href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}" />
+	<link rel="alternate" hreflang="ar" href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}?lang=ar" />
+	<link rel="alternate" hreflang="x-default" href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}" />
+	{% endif %}
+
+    <meta property="og:type" content="{% if page_type is defined %}{{ page_type }}{% else %}website{% endif %}">
+    <meta property="og:title" content="{% if page_title is defined %}{{ page_title }} - {% endif %}{{ siteName }}">
+    <meta property="og:url" content="{% if og_url is defined %}{{ siteUrl ~ og_url }}{% else %}{{ siteUrl }}{% endif %}" />
+    <meta property="og:image" content="{% if basicIMG is defined %}{{ basicIMG }}{% else %}{{ siteUrl }}files/images/banner{% if lang.lang_code == 'en' %}-en{% endif %}.png{% endif %}">
+    <meta property="og:description" content="{% if subPageDescription is defined %}{{ subPageDescription }}{% else %}{{ siteDescription }}{% endif %}">
+    <meta property="og:site_name" content="{{ siteName }}">
+
+    <link rel="icon" type="image/x-icon" href="{{ siteUrl }}files/images/favicon.ico" />
+
+    <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('news-theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        document.documentElement.setAttribute('data-theme', t);
+      }catch(e){}
+    })();
+    </script>
+
+    <link href="css/fontawesome.css" rel="stylesheet">
+    <link href="css/fontawesome/css/fontawesome_all.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ templatePath }}/assets/css/style.css?v=6">
+
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/js.cookie.min.js"></script>
+    <script src="js/sweetalert2.all.min.js"></script>
+    <script src="js/functions.js?v=1"></script>
+
+    {% if schema_json is defined %}
+    <script type="application/ld+json">
+    {{ schema_json|raw }}
+    </script>
+    {% endif %}
+</head>
+
+<body>
+
+    <div class="nav">
+        <div class="nav-inner">
+            <a href="{{ siteUrl }}" class="brand">
+                {% if logo_color %}<img src="{{ siteUrl }}files/images/{{ logo_color }}" alt="{{ siteName }}">{% endif %}
+                <span>{{ siteName|slice(0, 24) }}</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="{{ siteUrl }}"{% if nav_active is defined and nav_active == 'home' %} class="active"{% endif %}>{{ currentLang == 'en' ? 'Home' : 'الرئيسية' }}</a>
+                {% if moduleEnabled('blogs') %}
+                <a href="{{ siteUrl }}{{ routes.blog }}"{% if nav_active is defined and nav_active == 'blog' %} class="active"{% endif %}>{{ lang.blog }}</a>
+                {% endif %}
+                {% if moduleEnabled('team') %}
+                <a href="{{ siteUrl }}#team">{{ currentLang == 'en' ? 'Our Writers' : 'كتّابنا' }}</a>
+                {% endif %}
+                {% if moduleEnabled('faq') %}
+                <a href="{{ siteUrl }}#faq">{{ lang.faq }}</a>
+                {% endif %}
+                {% if moduleEnabled('contact') %}
+                <a href="{{ siteUrl }}{{ routes.contact }}"{% if nav_active is defined and nav_active == 'contact' %} class="active"{% endif %}>{{ lang.contact_us }}</a>
+                {% endif %}
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="{{ lang.toggle_dark_mode|default('تبديل الوضع الليلي') }}">
+                    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                {% if languageMode == 'both' %}
+                {% if lang.lang_code == "en" %}
+                <a class="nav-cta" style="white-space:nowrap;font-weight:800;font-size:13px;color:var(--muted);" href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}?lang=ar">عربي</a>
+                {% else %}
+                <a class="nav-cta" style="white-space:nowrap;font-weight:800;font-size:13px;color:var(--muted);" href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}?lang=en">EN</a>
+                {% endif %}
+                {% endif %}
+                <button class="nav-toggle" id="navToggle" aria-label="{{ lang.menu }}">
+                    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+        {% if blogCategories is defined and blogCategories|length > 0 %}
+        <div class="cat-bar">
+            <div class="cat-bar-inner">
+                {% for cat in blogCategories %}
+                <a href="{{ cat.url }}">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ siteUrl }}">{{ currentLang == 'en' ? 'Home' : 'الرئيسية' }}</a>
+        {% if moduleEnabled('blogs') %}<a href="{{ siteUrl }}{{ routes.blog }}">{{ lang.blog }}</a>{% endif %}
+        {% if moduleEnabled('team') %}<a href="{{ siteUrl }}#team">{{ currentLang == 'en' ? 'Our Writers' : 'كتّابنا' }}</a>{% endif %}
+        {% if moduleEnabled('faq') %}<a href="{{ siteUrl }}#faq">{{ lang.faq }}</a>{% endif %}
+        {% if moduleEnabled('contact') %}<a href="{{ siteUrl }}{{ routes.contact }}">{{ lang.contact_us }}</a>{% endif %}
+        {% if languageMode == 'both' %}
+        {% if lang.lang_code == "en" %}
+        <a href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}?lang=ar">عربي</a>
+        {% else %}
+        <a href="{{ siteUrl }}{% if og_url is defined %}{{ og_url }}{% endif %}?lang=en">English</a>
+        {% endif %}
+        {% endif %}
+        {% if moduleEnabled('contact') %}<a class="btn btn-primary" href="{{ siteUrl }}{{ routes.contact }}">{{ lang.get_in_touch }}</a>{% endif %}
+    </div>

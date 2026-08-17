@@ -1,0 +1,41 @@
+{% extends "base.twig" %}
+
+{% set page_title = word_search|default(lang.search_here) %}
+
+{% block content %}
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>{% if word_search is defined and word_search != '' %}{{ word_search }}{% else %}{{ lang.search_here }}{% endif %}</h1>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      {% if alert is defined %}<div style="text-align:center;color:var(--muted);font-weight:700;margin-bottom:30px;">{{ alert|raw }}</div>{% endif %}
+
+      {% if results is defined and results|length > 0 %}
+      <div class="blog-grid">
+        {% for result in results %}
+        <a href="{{ siteUrl }}{{ routes.blog }}/{{ result.slug }}" class="blog-card">
+          <div class="thumb">
+            {% if result.image or result.photo %}
+            <img src="{{ result.image|default(result.photo) }}" alt="{{ result.name|default(result.title) }}" loading="lazy">
+            {% else %}
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {% endif %}
+          </div>
+          <div class="body">
+            <h3>{{ result.name|default(result.title) }}</h3>
+            {% if result.description %}<p class="excerpt">{{ result.description|striptags|slice(0, 90) }}…</p>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;color:var(--muted);font-weight:700;">{{ lang.no_results }}</div>
+      {% endif %}
+    </div>
+  </section>
+
+{% endblock %}

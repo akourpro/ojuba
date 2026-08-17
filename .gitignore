@@ -1,0 +1,45 @@
+# أُعجوبة (Ojuba) — ملفات مستبعَدة من المستودع العام
+
+# بيانات الاتصال الحقيقية بقاعدة البيانات — كل تركيبة تنشئ نسختها الخاصة عبر
+# install.php (أو نسخ includes/config.sample.php يدوياً وتعديله)
+includes/config.php
+
+# ملفات الوسائط المرفوعة فعلياً (شعارات عملاء حقيقيين، صور مقالات/خدمات/أعمال
+# تجريبية، سير ذاتية...) — تُستبعد بالكامل ما عدا الأصول العامة الضرورية لعمل
+# القوالب (favicon، صورة افتراضية، أعلام تبديل اللغة، أيقونة الريال...) المُستثناة
+# صراحة أدناه. مجلدات فرعية فارغة تُحافَظ عليها عبر ملفات .gitkeep.
+files/*
+!files/*/
+files/*/*
+!files/*/.gitkeep
+!files/images/default-image.jpg
+!files/images/favicon.ico
+!files/images/favicon.png
+!files/images/flag_placeholder.png
+!files/images/flags_responsive.png
+!files/images/placeholder.png
+!files/images/quran.gif
+!files/images/riyal.svg
+
+# نسخ احتياطية تلقائية (قبل كل تحديث + الدورية) — تُنشأ محلياً بكل تركيبة
+/backups/
+
+# ذاكرة تخزين Twig المؤقتة — تُعاد بناؤها تلقائياً
+/compilation_cache/
+
+# ملفات مؤقتة لعمليات التحديث/استيراد القوالب
+/abma/tmp/
+/templates/goldenphase/
+/templates/workup/
+/templates/ojubaweb/
+
+# ملفات نظام التشغيل
+.DS_Store
+Thumbs.db
+
+# ملفات SAIP سابقة غير متعلقة بالمنتج — خاصة بجلسة عمل داخلية، ليست جزءاً من الكود
+أعجوبة - عينة الشيفرة المصدرية.html
+أعجوبة - كامل الشيفرة المصدرية.html
+
+# ملاحظات الجلسات الداخلية — موثَّق صراحةً بداخله أنه لا يُنشر بالمستودع العام
+CLAUDE.md

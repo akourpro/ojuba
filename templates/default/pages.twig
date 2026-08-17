@@ -1,0 +1,72 @@
+{% extends "base.twig" %}
+
+{% set page_title = page.name %}
+{% set subPageDescription = page.description|striptags|slice(0, 160) %}
+{% set og_url = routes.page ~ "/" ~ page.slug %}
+{% set page_type = "article" %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ siteUrl }}">{{ lang.home }}</a>
+      <span class="sep">/</span>
+      <span class="current">{{ page.name }}</span>
+    </div>
+
+    <!-- ===== PAGE HEAD ===== -->
+    <div class="article-head">
+      <h1>{{ page.name }}</h1>
+      <div class="article-meta">
+        <div class="avatar">{{ siteName|slice(0,2) }}</div>
+        <span>{{ siteName }}</span>
+        {% if page.ago %}<span class="sep">•</span><span>{{ page.ago }}</span>{% endif %}
+      </div>
+    </div>
+
+    <!-- ===== PAGE BODY ===== -->
+    <article class="article-body">
+      {{ page.description|raw }}
+    </article>
+
+    <div class="share-row" style="max-width:720px;margin-inline:auto;">
+      <span class="label">{{ lang.share|default('شارك:') }}</span>
+      <a class="social-btn" href="https://x.com/intent/tweet?url={{ siteUrl ~ og_url }}&text={{ page.name }}" target="_blank" rel="noopener" aria-label="X">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+      </a>
+      <a class="social-btn" href="https://www.linkedin.com/sharing/share-offsite/?url={{ siteUrl ~ og_url }}" target="_blank" rel="noopener" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg>
+      </a>
+      <a class="social-btn" href="https://wa.me/?text={{ page.name }}%20{{ siteUrl ~ og_url }}" target="_blank" rel="noopener" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4 8.3 8.3 0 0 1-3.9-.95L3 21l2.1-5.6a8.3 8.3 0 0 1-.95-3.9A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg>
+      </a>
+      <button class="social-btn" id="copyLinkBtn" type="button" aria-label="{{ lang.copy_link|default('نسخ الرابط') }}">
+        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.36-1.36"/></svg>
+      </button>
+    </div>
+  </div>
+
+  {% if pages is defined and pages|length > 1 %}
+  <!-- ===== OTHER PAGES ===== -->
+  <div class="related-wrap">
+    <div class="container">
+      <div class="related-head">
+        <div class="eyebrow"><span class="dot"></span> {{ lang.pages }}</div>
+        <h2>{{ lang.pages }}</h2>
+      </div>
+      <div class="blog-grid">
+        {% for p in pages %}
+        {% if p.slug != page.slug %}
+        <a class="blog-card" href="{{ siteUrl }}{{ routes.page }}/{{ p.slug }}">
+          <div class="body">
+            <h3>{{ p.name }}</h3>
+          </div>
+        </a>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+{% endblock %}

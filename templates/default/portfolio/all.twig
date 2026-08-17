@@ -1,0 +1,88 @@
+{% extends "base.twig" %}
+
+{% set page_title = currentLang == 'en' ? "Our Work" : "أعمالنا" %}
+{% set subPageDescription = currentLang == 'en' ? "A selection of work delivered by " ~ siteName ~ "." : "مجموعة مختارة من أعمال " ~ siteName ~ "." %}
+{% set og_url = routes.portfolio %}
+{% set nav_active = "portfolio" %}
+
+{% block content %}
+
+  <!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="container">
+      <div class="eyebrow"><span class="dot" style="background:#fff;"></span> {{ lang.portfolio|default('أعمالنا') }}</div>
+      <h1>{{ lang.portfolio|default('أعمالنا') }}</h1>
+      <p>{{ currentLang == 'en' ? "Take a look at some of our completed work." : "نظرة على بعض ما أنجزناه من أعمال." }}</p>
+    </div>
+  </section>
+
+  <!-- ===== PORTFOLIO GRID ===== -->
+  <section style="padding-top:40px;">
+    <div class="container">
+      {% if portfolios|length > 0 %}
+      <div class="blog-grid">
+        {% for item in portfolios %}
+        <a class="blog-card reveal" href="{{ item.url }}">
+          <div class="thumb">
+            {% if item.image %}
+            <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+            {% else %}
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {% endif %}
+          </div>
+          <div class="body">
+            {% if item.category %}<span class="cat-tag">{{ item.category }}</span>{% endif %}
+            <h3>{{ item.name }}</h3>
+            {% if item.description %}<p class="excerpt">{{ item.description|striptags|slice(0, 90) }}…</p>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;color:var(--muted);font-weight:700;">{{ lang.no_results }}</div>
+      {% endif %}
+
+      {% if pagination is defined and pagination.total_pages > 1 %}
+      <nav class="pagination" aria-label="pagination">
+        <ul>
+          <li class="{% if not pagination.has_prev %}disabled{% endif %}">
+            {% if pagination.has_prev %}<a href="{{ siteUrl }}{{ routes.portfolio }}?page={{ pagination.prev_page }}">{{ lang.previous }}</a>{% else %}<span>{{ lang.previous }}</span>{% endif %}
+          </li>
+          {% if pagination.show_first %}
+          <li><a href="{{ siteUrl }}{{ routes.portfolio }}?page=1">1</a></li>
+          {% if pagination.pages[0] > 2 %}<li class="dots"><span>…</span></li>{% endif %}
+          {% endif %}
+          {% for p in pagination.pages %}
+          <li class="{% if p == pagination.page %}active{% endif %}">
+            {% if p == pagination.page %}<span>{{ p }}</span>{% else %}<a href="{{ siteUrl }}{{ routes.portfolio }}?page={{ p }}">{{ p }}</a>{% endif %}
+          </li>
+          {% endfor %}
+          {% if pagination.show_last %}
+          {% if pagination.pages[pagination.pages|length - 1] < pagination.total_pages - 1 %}<li class="dots"><span>…</span></li>{% endif %}
+          <li><a href="{{ siteUrl }}{{ routes.portfolio }}?page={{ pagination.total_pages }}">{{ pagination.total_pages }}</a></li>
+          {% endif %}
+          <li class="{% if not pagination.has_next %}disabled{% endif %}">
+            {% if pagination.has_next %}<a href="{{ siteUrl }}{{ routes.portfolio }}?page={{ pagination.next_page }}">{{ lang.next }}</a>{% else %}<span>{{ lang.next }}</span>{% endif %}
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  {% if moduleEnabled('contact') %}
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="cta">
+        <h2>{{ currentLang == 'en' ? "Have a project in mind?" : "لديك مشروع في ذهنك؟" }}</h2>
+        <p>{{ currentLang == 'en' ? "Let's talk about how we can help." : "لنتحدث عن كيف يمكننا مساعدتك." }}</p>
+        <div class="cta-ctas">
+          <a class="btn btn-white" href="{{ siteUrl }}{{ routes.contact }}">{{ lang.contact_us }}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,89 @@
+    {% if moduleEnabled('ads') and adsFooter is defined and adsFooter|length > 0 %}
+    <div class="ad-zone ad-zone-footer">
+        <div class="container">
+            <div class="ad-eyebrow">{{ currentLang == 'en' ? 'Advertisement' : 'إعلان' }}</div>
+            <div class="ad-row">
+                {% for ad in adsFooter %}
+                <div class="ad-card">
+                    {% if ad.type == 'code' %}{{ ad.code|raw }}
+                    {% elseif ad.type == 'image' %}<img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy">
+                    {% elseif ad.type == 'image_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored"><img src="{{ ad.image }}" alt="{{ ad.name }}" loading="lazy"></a>
+                    {% elseif ad.type == 'text_link' %}<a href="{{ ad.link }}" target="_blank" rel="noopener sponsored" class="ad-text-link">{{ ad.text }}</a>
+                    {% elseif ad.type == 'text' %}<p class="ad-text">{{ ad.text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <footer>
+        <div class="container">
+            <div class="foot-grid">
+                <div class="foot-col foot-col-brand">
+                    <a href="{{ siteUrl }}" class="foot-brand">
+                        {% if logo %}<img src="{{ siteUrl }}files/images/{{ logo }}" alt="{{ siteName }}">{% endif %}
+                        <span>{{ siteName }}</span>
+                    </a>
+                    {% if siteDescription %}<p class="foot-desc">{{ siteDescription|striptags|slice(0, 140) }}</p>{% endif %}
+                </div>
+
+                <div class="foot-col">
+                    <h4 class="foot-col-title">{{ lang.quick_links }}</h4>
+                    <div class="foot-links foot-links-col">
+                        <a href="{{ siteUrl }}">{{ currentLang == 'en' ? 'Home' : 'الرئيسية' }}</a>
+                        {% if moduleEnabled('matches') %}<a href="{{ siteUrl }}#matches">{{ currentLang == 'en' ? 'Matches' : 'المباريات' }}</a>{% endif %}
+                        {% if moduleEnabled('standings') %}<a href="{{ siteUrl }}#standings">{{ currentLang == 'en' ? 'Standings' : 'الترتيب' }}</a>{% endif %}
+                        {% if moduleEnabled('blogs') %}<a href="{{ siteUrl }}{{ routes.blog }}">{{ currentLang == 'en' ? 'News' : 'الأخبار' }}</a>{% endif %}
+                        {% if moduleEnabled('videos') %}<a href="{{ siteUrl }}#videos">{{ currentLang == 'en' ? 'Videos' : 'الفيديوهات' }}</a>{% endif %}
+                        {% if moduleEnabled('team') %}<a href="{{ siteUrl }}#team">{{ currentLang == 'en' ? 'Our Writers' : 'كتّابنا' }}</a>{% endif %}
+                        {% if moduleEnabled('faq') %}<a href="{{ siteUrl }}#faq">{{ lang.faq }}</a>{% endif %}
+                        {% for page in pages %}
+                        <a href="{{ siteUrl }}{{ routes.page }}/{{ page.slug }}">{{ page.name }}</a>
+                        {% endfor %}
+                        {% if moduleEnabled('contact') %}<a href="{{ siteUrl }}{{ routes.contact }}">{{ lang.contact_us }}</a>{% endif %}
+                    </div>
+                </div>
+
+                <div class="foot-col">
+                    <h4 class="foot-col-title">{{ lang.contact_us }}</h4>
+                    <div class="foot-links foot-links-col">
+                        {% if site_mail %}<a href="mailto:{{ site_mail }}">{{ site_mail }}</a>{% endif %}
+                        {% if site_phone %}<a href="tel:{{ site_phone }}">{{ site_phone }}</a>{% endif %}
+                        {% if whatsapp_number %}<a href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener">{{ lang.whatsapp }}</a>{% endif %}
+                        {% if location %}<span class="foot-address">{{ location }}</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="foot-col">
+                    <h4 class="foot-col-title">{{ lang.follow_us }}</h4>
+                    <div class="foot-social">
+                        {% if facebook %}<a href="https://facebook.com/{{ facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M13 22v-9h3l1-4h-4V6.5c0-1.15.32-1.93 1.97-1.93H17V1.14C16.67 1.1 15.53 1 14.2 1 11.4 1 9.5 2.7 9.5 5.9V9H6.5v4H9.5v9h3.5z"/></svg></a>{% endif %}
+                        {% if twitter %}<a href="https://x.com/{{ twitter }}" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg></a>{% endif %}
+                        {% if instagram %}<a href="https://instagram.com/{{ instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1"/></svg></a>{% endif %}
+                        {% if linkedin %}<a href="https://linkedin.com/company/{{ linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.6" r="0.6"/><path d="M11 17v-4.5a2 2 0 0 1 4 0V17"/><line x1="11" y1="10" x2="11" y2="17"/></svg></a>{% endif %}
+                        {% if youtube %}<a href="https://youtube.com/{{ youtube }}" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path fill="currentColor" stroke="none" d="M10 9l5 3-5 3z"/></svg></a>{% endif %}
+                        {% if snapchat %}<a href="https://snapchat.com/add/{{ snapchat }}" target="_blank" rel="noopener" aria-label="Snapchat"><svg viewBox="0 0 24 24"><circle cx="12" cy="11" r="7"/><path d="M8.5 15.5c1 1 2 1.2 3.5 1.2s2.5-.2 3.5-1.2"/></svg></a>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="foot-copy">&copy; {{ "now"|date("Y") }} {{ siteName }} — {{ lang.all_rights_reserved }}</div>
+        </div>
+    </footer>
+
+    {% if moduleEnabled('contact') %}
+    <div class="mobile-cta-bar">
+        <span>{{ lang.get_in_touch }}</span>
+        <a class="btn btn-primary" href="{{ siteUrl }}{{ routes.contact }}">{{ lang.contact_us }}</a>
+    </div>
+    {% endif %}
+
+    <script src="{{ templatePath }}/assets/js/main.js"></script>
+    {% if moduleEnabled('mailing') %}
+    <script src="js/subscribe.js"></script>
+    {% endif %}
+    <!-- ضع أكواد التتبّع أو الأدوات الإضافية الخاصة بموقعك هنا إن احتجت -->
+</body>
+
+</html>

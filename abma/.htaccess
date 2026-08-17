@@ -1,0 +1,199 @@
+# auto include
+php_value auto_prepend_file abma/autoload.php
+php_value auto_append_file abma/footer.php
+
+# رفع ملفات zip لاستيراد القوالب (حتى 20 ميجا) يحتاج حدوداً أعلى من الافتراضي الشائع
+<IfModule mod_php.c>
+    php_value upload_max_filesize 25M
+    php_value post_max_size 30M
+</IfModule>
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 25M
+    php_value post_max_size 30M
+</IfModule>
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 25M
+    php_value post_max_size 30M
+</IfModule>
+
+#Routes
+RewriteEngine On
+
+
+#Index page
+DirectoryIndex index.php
+RewriteRule ^dashboard/?$ index.php [QSA,L]
+
+# API routes 
+RewriteRule ^api/search/?$ api/search.php [QSA,L]
+
+# Admin account 
+RewriteRule ^account/?$ account.php [QSA,L]
+RewriteRule ^language/?$ language.php [QSA,L]
+
+
+# Login 
+RewriteRule ^auth/?$ auth/login.php [QSA,L]
+RewriteRule ^auth/login/?$ auth/login.php [QSA,L]
+RewriteRule ^auth/logout/?$ auth/logout.php [QSA,L]
+
+# Media library
+RewriteRule ^media/?$ media/index.php?lang= [QSA,L]
+
+# Pages
+RewriteRule ^pages/?$ pages/all.php?lang= [QSA,L]
+RewriteRule ^pages/new/?$ pages/new.php?lang= [QSA,L]
+RewriteRule ^pages/([0-9]+)/edit/?$ pages/edit.php?id=$1&lang= [QSA,L]
+
+# Blogs 
+RewriteRule ^blogs/?$ blogs/all.php?lang= [QSA,L]
+RewriteRule ^blogs/new/?$ blogs/new.php?lang= [QSA,L]
+RewriteRule ^blogs/([0-9]+)/edit/?$ blogs/edit.php?id=$1&lang= [QSA,L]
+
+# Services 
+RewriteRule ^services/?$ services/all.php?lang= [QSA,L]
+RewriteRule ^services/new/?$ services/new.php?lang= [QSA,L]
+RewriteRule ^services/([0-9]+)/edit/?$ services/edit.php?id=$1&lang= [QSA,L]
+
+# Portfolio
+RewriteRule ^portfolio/?$ portfolio/all.php?lang= [QSA,L]
+RewriteRule ^portfolio/new/?$ portfolio/new.php?lang= [QSA,L]
+RewriteRule ^portfolio/([0-9]+)/edit/?$ portfolio/edit.php?id=$1&lang= [QSA,L]
+
+# Category
+RewriteRule ^categories/?$ categories.php?lang= [QSA,L]
+
+# Blog Categories
+RewriteRule ^blog-categories/?$ blog_categories.php?lang= [QSA,L]
+
+# Team
+RewriteRule ^team/?$ team/all.php?lang= [QSA,L]
+RewriteRule ^team/new/?$ team/new.php?lang= [QSA,L]
+RewriteRule ^team/([0-9]+)/edit/?$ team/edit.php?id=$1&lang= [QSA,L]
+
+# Testimonials
+RewriteRule ^testimonials/?$ testimonials/all.php?lang= [QSA,L]
+RewriteRule ^testimonials/new/?$ testimonials/new.php?lang= [QSA,L]
+RewriteRule ^testimonials/([0-9]+)/edit/?$ testimonials/edit.php?id=$1&lang= [QSA,L]
+
+# FAQ
+RewriteRule ^faq/?$ faq/all.php?lang= [QSA,L]
+RewriteRule ^faq/new/?$ faq/new.php?lang= [QSA,L]
+RewriteRule ^faq/([0-9]+)/edit/?$ faq/edit.php?id=$1&lang= [QSA,L]
+
+# Stats
+RewriteRule ^stats/?$ stats/all.php?lang= [QSA,L]
+RewriteRule ^stats/new/?$ stats/new.php?lang= [QSA,L]
+RewriteRule ^stats/([0-9]+)/edit/?$ stats/edit.php?id=$1&lang= [QSA,L]
+
+# Pricing
+RewriteRule ^pricing/?$ pricing/all.php?lang= [QSA,L]
+RewriteRule ^pricing/new/?$ pricing/new.php?lang= [QSA,L]
+RewriteRule ^pricing/([0-9]+)/edit/?$ pricing/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^pricing/migrate/?$ pricing/migrate.php?lang= [QSA,L]
+
+# Pricing page FAQs (خاصة بصفحة الأسعار المستقلة /pricing)
+RewriteRule ^pricing-faqs/?$ pricing_faqs/all.php?lang= [QSA,L]
+RewriteRule ^pricing-faqs/new/?$ pricing_faqs/new.php?lang= [QSA,L]
+RewriteRule ^pricing-faqs/([0-9]+)/edit/?$ pricing_faqs/edit.php?id=$1&lang= [QSA,L]
+
+# Pricing page comparison table (خاصة بصفحة الأسعار المستقلة /pricing)
+RewriteRule ^pricing-compare/?$ pricing_compare/all.php?lang= [QSA,L]
+RewriteRule ^pricing-compare/new/?$ pricing_compare/new.php?lang= [QSA,L]
+RewriteRule ^pricing-compare/([0-9]+)/edit/?$ pricing_compare/edit.php?id=$1&lang= [QSA,L]
+
+# Branches
+RewriteRule ^branches/?$ branches/all.php?lang= [QSA,L]
+RewriteRule ^branches/new/?$ branches/new.php?lang= [QSA,L]
+RewriteRule ^branches/([0-9]+)/edit/?$ branches/edit.php?id=$1&lang= [QSA,L]
+
+# Certificates
+RewriteRule ^certificates/?$ certificates/all.php?lang= [QSA,L]
+RewriteRule ^certificates/new/?$ certificates/new.php?lang= [QSA,L]
+RewriteRule ^certificates/([0-9]+)/edit/?$ certificates/edit.php?id=$1&lang= [QSA,L]
+
+# Clients
+RewriteRule ^clients/?$ clients/all.php?lang= [QSA,L]
+RewriteRule ^clients/new/?$ clients/new.php?lang= [QSA,L]
+RewriteRule ^clients/([0-9]+)/edit/?$ clients/edit.php?id=$1&lang= [QSA,L]
+
+# Contacts
+RewriteRule ^contacts/?$ contacts/all.php?lang= [QSA,L]
+
+# Mailing (owner only)
+RewriteRule ^mailing/?$ mailing/lists.php?lang= [QSA,L]
+RewriteRule ^mailing/lists/?$ mailing/lists.php?lang= [QSA,L]
+RewriteRule ^mailing/lists/new/?$ mailing/lists-new.php?lang= [QSA,L]
+RewriteRule ^mailing/lists/([0-9]+)/edit/?$ mailing/lists-edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^mailing/lists/([0-9]+)/contacts/?$ mailing/contacts.php?list_id=$1&lang= [QSA,L]
+RewriteRule ^mailing/lists/([0-9]+)/contacts/new/?$ mailing/contacts-new.php?list_id=$1&lang= [QSA,L]
+RewriteRule ^mailing/lists/([0-9]+)/contacts/bulk/?$ mailing/contacts-bulk.php?list_id=$1&lang= [QSA,L]
+RewriteRule ^mailing/lists/([0-9]+)/contacts/import/?$ mailing/contacts-import.php?list_id=$1&lang= [QSA,L]
+RewriteRule ^mailing/lists/([0-9]+)/contacts/([0-9]+)/edit/?$ mailing/contacts-edit.php?list_id=$1&id=$2&lang= [QSA,L]
+RewriteRule ^mailing/campaigns/?$ mailing/campaigns.php?lang= [QSA,L]
+RewriteRule ^mailing/campaigns/new/?$ mailing/campaigns-new.php?lang= [QSA,L]
+RewriteRule ^mailing/campaigns/([0-9]+)/?$ mailing/campaigns-view.php?id=$1&lang= [QSA,L]
+RewriteRule ^mailing/migrate/?$ mailing/migrate.php?lang= [QSA,L]
+
+# Ads (owner only)
+RewriteRule ^ads/?$ ads/all.php?lang= [QSA,L]
+RewriteRule ^ads/new/?$ ads/new.php?lang= [QSA,L]
+RewriteRule ^ads/([0-9]+)/edit/?$ ads/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^ads/migrate/?$ ads/migrate.php?lang= [QSA,L]
+
+# Matches (owner only)
+RewriteRule ^matches/?$ matches/all.php?lang= [QSA,L]
+RewriteRule ^matches/new/?$ matches/new.php?lang= [QSA,L]
+RewriteRule ^matches/([0-9]+)/edit/?$ matches/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^matches/migrate/?$ matches/migrate.php?lang= [QSA,L]
+
+# Standings (owner only)
+RewriteRule ^standings/?$ standings/all.php?lang= [QSA,L]
+RewriteRule ^standings/new/?$ standings/new.php?lang= [QSA,L]
+RewriteRule ^standings/([0-9]+)/edit/?$ standings/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^standings/migrate/?$ standings/migrate.php?lang= [QSA,L]
+
+# Videos (owner only)
+RewriteRule ^videos/?$ videos/all.php?lang= [QSA,L]
+RewriteRule ^videos/new/?$ videos/new.php?lang= [QSA,L]
+RewriteRule ^videos/([0-9]+)/edit/?$ videos/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^videos/migrate/?$ videos/migrate.php?lang= [QSA,L]
+
+# Feeds (owner only)
+RewriteRule ^feeds/?$ feeds/all.php?lang= [QSA,L]
+RewriteRule ^feeds/new/?$ feeds/new.php?lang= [QSA,L]
+RewriteRule ^feeds/([0-9]+)/edit/?$ feeds/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^feeds/migrate/?$ feeds/migrate.php?lang= [QSA,L]
+
+# Users (owner only)
+RewriteRule ^users/?$ users/all.php?lang= [QSA,L]
+RewriteRule ^users/new/?$ users/new.php?lang= [QSA,L]
+RewriteRule ^users/([0-9]+)/edit/?$ users/edit.php?id=$1&lang= [QSA,L]
+RewriteRule ^users/migrate/?$ users/migrate.php?lang= [QSA,L]
+
+# Logs (owner only)
+RewriteRule ^logs/?$ logs/all.php?lang= [QSA,L]
+
+# Backup (owner only)
+RewriteRule ^backup/?$ backup/index.php [QSA,L]
+
+# Updates (owner only)
+RewriteRule ^updates/?$ updates/index.php?lang= [QSA,L]
+
+# Home sections ordering (owner only)
+RewriteRule ^home/?$ home/index.php?lang= [QSA,L]
+
+# Activity wizard
+RewriteRule ^wizard/?$ wizard.php [QSA,L]
+
+# Settings
+RewriteRule ^settings/?$ settings/settings.php [QSA,L]
+RewriteRule ^templates/?$ templates.php [QSA,L]
+RewriteRule ^addons/?$ addons/index.php?lang= [QSA,L]
+RewriteRule ^theme-editor/?$ theme-editor/index.php [QSA,L]
+
+
+#file without ext
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php

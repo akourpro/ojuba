@@ -1,0 +1,28 @@
+{
+    "name": "OjubaSport",
+    "activity_type": "blog",
+    "modules": {
+        "pages": true,
+        "blogs": true,
+        "blog_categories": true,
+        "services": false,
+        "portfolio": false,
+        "categories": false,
+        "contact": true,
+        "search": true,
+        "clients": true,
+        "team": true,
+        "testimonials": false,
+        "faq": true,
+        "stats": true,
+        "pricing": false,
+        "branches": false,
+        "certificates": false,
+        "mailing": true,
+        "ads": true,
+        "matches": true,
+        "standings": true,
+        "videos": true,
+        "feeds": true
+    }
+}

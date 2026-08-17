@@ -1,0 +1,29 @@
+{
+    "name": "Default",
+    "activity_type": "company",
+    "data": {
+        "name": "الافتراضي",
+        "description": "قالب افتراضي يصلح ان يكون موقع تعريفي للشركات، ويحتوي على الخصائص (مقالات، خدمات، أعمال، فريق، آراء عملاء، أسئلة شائعة، إحصائيات، باقات أسعار، فروع، شهادات وغيرها)",
+        "design": "أُعجوبة",
+        "url": "https://ojuba.sa"
+    },
+    "modules": {
+        "pages": true,
+        "blogs": true,
+        "blog_categories": true,
+        "services": true,
+        "portfolio": true,
+        "categories": true,
+        "contact": true,
+        "search": true,
+        "clients": true,
+        "team": true,
+        "testimonials": true,
+        "faq": true,
+        "stats": true,
+        "pricing": true,
+        "branches": true,
+        "certificates": true,
+        "mailing": true
+    }
+}

@@ -1,0 +1,92 @@
+{% extends "base.twig" %}
+
+{% set page_title = currentLang == 'en' ? "Matches" ~ " - " ~ siteName : "جدول المباريات - " ~ siteName %}
+{% set subPageDescription = currentLang == 'en' ? "Full match schedule: live, upcoming and past results." : "جدول كامل بكل المباريات: مباشرة وقادمة ونتائج سابقة." %}
+{% set og_url = routes.matches %}
+
+{% block content %}
+
+  <!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="container">
+      <div class="eyebrow"><span class="dot" style="background:#fff;"></span> {{ currentLang == 'en' ? 'Matches' : 'المباريات' }}</div>
+      <h1>{{ currentLang == 'en' ? 'Match Schedule' : 'جدول المباريات' }}</h1>
+      <p>{{ currentLang == 'en' ? 'Live matches, upcoming fixtures and past results.' : 'المباريات المباشرة، المواعيد القادمة، والنتائج السابقة.' }}</p>
+    </div>
+  </section>
+
+  <section style="padding-top:40px;">
+    <div class="container">
+      {% if matches|length > 0 %}
+      <div class="matches-grid">
+        {% for m in matches %}
+        <a class="match-card match-status-{{ m.match_status }}" href="{{ m.url }}">
+          <div class="match-top">
+            {% if m.competition %}<span class="match-competition">{{ m.competition }}</span>{% endif %}
+            {% if m.match_status == 'live' %}
+            <span class="match-badge live">{{ currentLang == 'en' ? 'Live Now' : 'مباشر الآن' }}</span>
+            {% elseif m.match_status == 'finished' %}
+            <span class="match-badge finished">{{ currentLang == 'en' ? 'Finished' : 'انتهت' }}</span>
+            {% else %}
+            <span class="match-badge upcoming">{{ m.date_human }}</span>
+            {% endif %}
+          </div>
+          <div class="match-teams">
+            <div class="match-team">
+              {% if m.team_home_logo %}<img src="{{ m.team_home_logo }}" alt="{{ m.team_home }}" loading="lazy">{% endif %}
+              <span>{{ m.team_home }}</span>
+            </div>
+            <div class="match-center">
+              {% if m.match_status == 'upcoming' %}
+              <span class="match-vs">VS</span>
+              {% else %}
+              <span class="match-score">{{ m.score_home }} - {{ m.score_away }}</span>
+              {% endif %}
+            </div>
+            <div class="match-team">
+              {% if m.team_away_logo %}<img src="{{ m.team_away_logo }}" alt="{{ m.team_away }}" loading="lazy">{% endif %}
+              <span>{{ m.team_away }}</span>
+            </div>
+          </div>
+          {% if m.venue or m.broadcast_channel %}
+          <div class="match-foot">
+            {% if m.venue %}<span class="match-venue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ m.venue }}</span>{% endif %}
+            {% if m.broadcast_channel %}<span class="match-broadcast"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><polygon points="10 10 15 12.5 10 15"/></svg>{{ m.broadcast_channel }}</span>{% endif %}
+          </div>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;color:var(--muted);font-weight:700;">{{ lang.no_results }}</div>
+      {% endif %}
+
+      {% if pagination is defined and pagination.total_pages > 1 %}
+      <nav class="pagination" aria-label="pagination">
+        <ul>
+          <li class="{% if not pagination.has_prev %}disabled{% endif %}">
+            {% if pagination.has_prev %}<a href="?page={{ pagination.prev_page }}">{{ lang.previous }}</a>{% else %}<span>{{ lang.previous }}</span>{% endif %}
+          </li>
+          {% if pagination.show_first %}
+          <li><a href="?page=1">1</a></li>
+          {% if pagination.pages[0] > 2 %}<li class="dots"><span>…</span></li>{% endif %}
+          {% endif %}
+          {% for p in pagination.pages %}
+          <li class="{% if p == pagination.page %}active{% endif %}">
+            {% if p == pagination.page %}<span>{{ p }}</span>{% else %}<a href="?page={{ p }}">{{ p }}</a>{% endif %}
+          </li>
+          {% endfor %}
+          {% if pagination.show_last %}
+          {% if pagination.pages[pagination.pages|length - 1] < pagination.total_pages - 1 %}<li class="dots"><span>…</span></li>{% endif %}
+          <li><a href="?page={{ pagination.total_pages }}">{{ pagination.total_pages }}</a></li>
+          {% endif %}
+          <li class="{% if not pagination.has_next %}disabled{% endif %}">
+            {% if pagination.has_next %}<a href="?page={{ pagination.next_page }}">{{ lang.next }}</a>{% else %}<span>{{ lang.next }}</span>{% endif %}
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </section>
+
+{% endblock %}

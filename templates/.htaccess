@@ -1,0 +1,43 @@
+# ============================================================
+# منع تنفيذ أي ملفات من جانب السيرفر داخل مجلد templates بالكامل
+# (كل القوالب وكل الملفات/المجلدات الفرعية بداخلها بدون استثناء)
+#
+# القوالب يجب أن تحتوي فقط على: Twig, HTML, CSS, SCSS/SASS/LESS, JS,
+# JSON (لملفات إعداد مثل theme.json)، وملفات وسائط ثابتة (صور/خطوط).
+# لا يجوز إطلاقاً وجود أو تنفيذ أي ملف PHP أو أي كود يعمل من جانب
+# الخادم داخل هذا المجلد — راجع DESIGNER.md لتفاصيل هذه القاعدة.
+#
+# هذا الملف طبقة حماية على مستوى السيرفر نفسه (وليس فقط تعليمات
+# للذكاء الاصطناعي)، حتى لو انتهى ملف تنفيذي داخل templates/ بالخطأ
+# أو نتيجة رفع ملف قالب غير موثوق، فلن يُنفَّذ أبداً.
+# ============================================================
+
+# الطبقة الأولى: تعطيل محرّك PHP نفسه لهذا المسار وكل ما تحته (mod_php بإصداراته)
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# إزالة أي ربط بين امتدادات PHP ومعالجها (يفيد مع إعدادات PHP-FPM/CGI/FastCGI)
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .pht
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .pht
+
+# الطبقة الثانية: منع الوصول تماماً (403) لأي طلب لملف بامتداد تنفيذي، بغض النظر
+# عن طريقة تشغيل PHP على السيرفر أو أي إعداد آخر — هذه الطبقة تعمل دائماً
+<FilesMatch "\.(php[3-8]?|phtml|phps|pht|phar|pl|py|cgi|fcgi|sh|bash|exe|dll|asp|aspx|jsp|jspx|cer|jar)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# منع تشغيل CGI ومنع عرض محتويات المجلدات
+Options -Indexes -ExecCGI -MultiViews
