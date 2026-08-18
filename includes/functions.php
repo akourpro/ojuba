@@ -1,10 +1,5 @@
 <?php
 
-// نظام Hooks/Actions (add_action/do_action/add_filter/apply_filters) — يُحمَّل
-// هنا أولاً (قبل أي شيء آخر) ليكون add_action()/add_filter() متاحتين لأي ملف
-// إضافة بمجلد includes/addons/ يُحمَّل تلقائياً بنهاية هذا الملف، وقبل أي نقطة
-// امتداد فعلية بباقي السكربت تستدعي do_action()/apply_filters(). راجع
-// includes/hooks.php للتوثيق الكامل ونقاط الامتداد المتوفرة.
 include_once 'includes/hooks.php';
 
 include_once 'includes/libs/HTMLPurifier/HTMLPurifier.auto.php';
@@ -719,7 +714,7 @@ function adsTableExists()
  * تجلب الإعلانات النشطة لموضع مُعيَّن (position)، جاهزة للتمرير مباشرة لـ Twig.
  * تتحقق تلقائياً من تفعيل الوحدة ووجود الجدول، فيمكن استدعاؤها بأمان من أي
  * صفحة (home.php, blogs/view.php, twigload.php) دون تكرار هذا التحقق في كل
- * مكان. مواضع الإعلانات الثابتة بالقالب النشط (workup):
+ * مكان. مواضع الإعلانات الثابتة بالقالب النشط:
  * home_top, home_between, blog_sidebar, article_inline, footer
  */
 function getAdsByPosition($position)

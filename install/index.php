@@ -1,39 +1,5 @@
 <?php
 
-/**
- * معالج تثبيت أُعجوبة (Installer Wizard) — بديل التركيب اليدوي (تعديل
- * includes/config.php + استيراد db.sql عبر phpMyAdmin يدوياً) بواجهة رسومية
- * من 5 خطوات: فحص المتطلبات ← بيانات قاعدة البيانات ← معلومات الموقع ←
- * استيراد البنية ← إنشاء حساب المالك. مستقل تماماً عن autoload.php/twigload.php
- * (لا يوجد اتصال بقاعدة بيانات صالح بعد عند بدء التثبيت).
- *
- * **الموقع**: هذا الملف (وdb.sql المجاور له) داخل مجلد install/ وليس بجذر
- * المشروع — سبب هذا الفصل: ملف .htaccess بجذر المشروع يضبط
- * `php_value auto_prepend_file autoload.php` على كل طلب PHP بالموقع بلا
- * استثناء (بما فيه هذا الملف لو بقي بالجذر)، وautoload.php يستدعي
- * includes/config.php ثم gsite() فوراً — وهي تفشل بخطأ قاتل إن لم يوجد
- * الملف/الجدول بعد (بالضبط حالة موقع لم يُثبَّت بعد). install/.htaccess
- * المجاور يُلغي auto_prepend_file صراحة (`php_value auto_prepend_file none`)
- * فيعمل هذا الملف بمعزل تام عن تلك السلسلة. **لا تُعِد هذا الملف لجذر
- * المشروع مستقبلاً** دون معالجة هذا التعارض بطريقة أخرى.
- *
- * أمان: يرفض العمل إن كان السكربت مثبَّتاً بالفعل (config.php موجود + اتصال
- * ناجح + جدول admins به صف واحد على الأقل) — لا يمكن إعادة استخدامه لاختراق
- * تركيبة قائمة. يُنصح صاحب الموقع بحذف مجلد install/ بالكامل من الاستضافة
- * بعد اكتمال التثبيت (تذكير مباشر بالخطوة الأخيرة).
- *
- * ملاحظة مهمة: install/db.sql يحتوي بيانات تجريبية شخصية لمطوّر السكربت
- * (حساب owner تجريبي، مفاتيح واتساب، بيانات SMTP...) ضمن جمل INSERT — هذا
- * المعالج **يستورد بنية الجداول فقط (CREATE TABLE + المفاتيح الأساسية)
- * ويتجاهل كل جمل INSERT عمداً**، ثم يزرع صفاً نظيفاً من الإعدادات الأساسية
- * (المُدخَلة من صاحب الموقع بالخطوة 3) وحساب المالك الحقيقي الذي يُدخله صاحب
- * الموقع بنفسه بالخطوة الأخيرة.
- *
- * الخطوة 3 (معلومات الموقع) تُخزَّن مؤقتاً بجلسة PHP ($_SESSION['install_site_info'])
- * بين تقديم النموذج وتنفيذ الاستيراد الفعلي بالخطوة 4 — لذا session_start()
- * مطلوبة هنا رغم أن باقي السكربت لا يعتمد على جلسات لوحة التحكم إطلاقاً.
- */
-
 session_start();
 
 // $installDir: مجلد هذا الملف نفسه (install/) — يُستخدم فقط لقراءة db.sql المجاور.
@@ -152,6 +118,56 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 	$content = preg_replace('/^ErrorDocument 403 .*$/m', 'ErrorDocument 403 ' . $prefix . '/errors/404.php', $content, 1);
 
 	return @file_put_contents($htaccessPath, $content) !== false;
+}
+
+/**
+ * js/functions.js يحمل مساراً مطلقاً ثابتاً لملف ترجمة نصوص JS
+ * (SweetAlert2...): `url: "/cms/includes/lang/" + languFile,` — "cms" هنا هو
+ * اسم مجلد بيئة تطوير السكربت الأصلية، وليس شيئاً عاماً. إن بقي كما هو، ستفشل
+ * كل تنبيهات SweetAlert2 (تظهر بلا نص) في أي تركيبة لا تحمل هذا الاسم بالضبط.
+ * نفس منطق installerUpdateHtaccess() بالضبط: نستبدله بمسار المجلد الفرعي
+ * الصحيح (site_folder) إن وُجد، أو نزيله بالكامل إن كان السكربت مثبَّتاً بجذر
+ * النطاق مباشرة.
+ */
+function installerUpdateFunctionsJs($rootDir, $siteFolder)
+{
+	$jsPath = $rootDir . 'js/functions.js';
+	$content = @file_get_contents($jsPath);
+	if ($content === false) {
+		return false;
+	}
+
+	$prefix = $siteFolder !== '' ? '/' . trim($siteFolder, '/') : '';
+	$content = str_replace('"/cms/includes/lang/"', '"' . $prefix . '/includes/lang/"', $content);
+
+	return @file_put_contents($jsPath, $content) !== false;
+}
+
+/**
+ * .user.ini (بجذر المشروع) — يُستخدَم على استضافات PHP-FPM/CGI حيث php_value
+ * بـ.htaccess لا يُطبَّق (خلافاً لـmod_php)، فهو يكرّر نفس القيم بصيغة .ini:
+ * open_basedir (قصر وصول PHP على مجلد الموقع + /tmp فقط، أمان أساسي) و
+ * include_path — كلاهما يحتاج المسار الحقيقي المطلق لجذر التركيبة على القرص،
+ * تماماً مثل سطر include_path بـ.htaccess (installerUpdateHtaccess() أعلاه) —
+ * نفس $realPath يُستخدَم هنا لضمان تطابق القيمتين دائماً. auto_prepend_file/
+ * auto_append_file لا يحتاجان تعديلاً (قيمتاهما عامة أصلاً). الملف قد لا يكون
+ * موجوداً على كل الاستضافات (مثل بيئات mod_php المحلية) — لا نعتبر غيابه خطأ.
+ */
+function installerUpdateUserIni($rootDir)
+{
+	$iniPath = $rootDir . '.user.ini';
+	$content = @file_get_contents($iniPath);
+	if ($content === false) {
+		return false;
+	}
+
+	$real = realpath($rootDir);
+	$realPath = rtrim(str_replace('\\', '/', $real !== false ? $real : $rootDir), '/') . '/';
+
+	$content = preg_replace('/^open_basedir=.*$/m', 'open_basedir=' . $realPath . ':/tmp/', $content, 1);
+	$content = preg_replace('/^include_path=".*"$/m', 'include_path="' . $realPath . '"', $content, 1);
+
+	return @file_put_contents($iniPath, $content) !== false;
 }
 
 /**
@@ -296,9 +312,13 @@ if ($step === 3 && isset($_POST['site_submit'])) {
 		$siteFolder = trim(parse_url($siteUrl, PHP_URL_PATH) ?? '', '/');
 
 		// تحديث .htaccess بالمسار الحقيقي على القرص + بادئة المجلد الفرعي الصحيحة
-		// لأسطر ErrorDocument — لا يوقف التثبيت إن فشل (صلاحيات كتابة مثلاً)، فقط
-		// يُسجَّل تنبيه بسيط بالخطوة التالية إن احتجنا ذلك مستقبلاً.
+		// لأسطر ErrorDocument، تحديث مسار ملف ترجمة JS بنفس البادئة، وتحديث
+		// .user.ini (open_basedir/include_path لاستضافات PHP-FPM) بنفس المسار
+		// الحقيقي المستخدَم بـ.htaccess — لا يوقف التثبيت إن فشل أيّ منها
+		// (صلاحيات كتابة مثلاً، أو عدم وجود .user.ini أصلاً على بعض البيئات).
 		installerUpdateHtaccess($rootDir, $siteFolder);
+		installerUpdateFunctionsJs($rootDir, $siteFolder);
+		installerUpdateUserIni($rootDir);
 
 		$_SESSION['install_site_info'] = $siteInfoValues;
 		$_SESSION['install_site_folder'] = $siteFolder;
@@ -355,8 +375,35 @@ if ($step === 4) {
 					'site_metaTags_en' => $submitted['site_metaTags_en'],
 					'site_url' => $submitted['site_url'],
 					'site_folder' => $siteFolder,
-					'theme' => 'workup',
+					'theme' => 'default',
 					'logo' => 'logo.png',
+					'whatsapp_number' => '',
+					'logo_color' => '',
+					'location_en' => '',
+					'facebook' => '',
+					'instagram' => '',
+					'snapchat' => '',
+					'discord' => '',
+					'twitter' => '',
+					'github' => '',
+					'linkedin' => '',
+					'youtube' => '',
+					'site_mail' => '',
+					'site_phone' => '',
+					'maps' => '',
+					'pdf' => '',
+					'indexnow' => '5e0b22602ab74773bbb99d19d0dbc4ab',
+					// SMTP
+					'smtp_host' => '',
+					'smtp_user' => '',
+					'smtp_pass' => '',
+					// Telegram
+					'tg_token' => '',
+					'tg_id' => '',
+					'tg_status' => '',
+					// Whatsapp
+					'wa_appkey' => '',
+					'wa_authkey' => '',
 					'language_mode' => $submitted['language_mode'],
 					'business_type' => $submitted['business_type'],
 				];
@@ -449,66 +496,208 @@ function installerLayout($step, $title, $bodyHtml, $errors = [], $extraHead = ''
 {
 	$steps = ['1' => 'المتطلبات', '2' => 'قاعدة البيانات', '3' => 'معلومات الموقع', '4' => 'استيراد البنية', '5' => 'حساب المالك'];
 	ob_start();
-	?>
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>تثبيت أُعجوبة — <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></title>
-<style>
-	body{font-family:-apple-system,Segoe UI,Tahoma,Arial,sans-serif;background:#f4f3fb;margin:0;color:#1b1730}
-	.wrap{max-width:640px;margin:40px auto;padding:0 20px}
-	.card{background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(30,20,80,.08);padding:32px}
-	h1{font-size:22px;margin:0 0 4px}
-	.sub{color:#847f9c;margin:0 0 24px;font-size:14px}
-	.steps{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
-	.steps span{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:12px;background:#f0eefb;color:#847f9c}
-	.steps span.active{background:#5b3df6;color:#fff;font-weight:bold}
-	label{display:block;margin:14px 0 6px;font-size:14px;font-weight:600}
-	input[type=text],input[type=email],input[type=password],select,textarea{width:100%;padding:10px 12px;border:1px solid #e2e0f0;border-radius:8px;font-size:14px;box-sizing:border-box;font-family:inherit}
-	textarea{resize:vertical;min-height:70px}
-	button{margin-top:22px;background:#5b3df6;color:#fff;border:0;padding:12px 22px;border-radius:8px;font-size:15px;cursor:pointer}
-	button:hover{background:#4a2fe0}
-	a.btn{display:inline-block;margin-top:22px;background:#5b3df6;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-size:15px}
-	.req{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0eefb;font-size:14px}
-	.ok{color:#1fa971;font-weight:bold}
-	.bad{color:#e5484d;font-weight:bold}
-	.err{background:#fdecec;color:#c92a2a;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:14px}
-	code{background:#f0eefb;padding:2px 6px;border-radius:4px}
-	.hint{color:#847f9c;font-size:12px;margin-top:4px}
-	fieldset{border:1px solid #f0eefb;border-radius:10px;padding:12px 14px 4px;margin-top:18px}
-	legend{padding:0 6px;font-size:13px;font-weight:600;color:#5b3df6}
-	.select2-container{margin-top:2px}
-</style>
-<?php echo $extraHead; ?>
-</head>
-<body>
-<div class="wrap">
-	<div class="card">
-		<h1>تثبيت أُعجوبة</h1>
-		<p class="sub"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></p>
-		<div class="steps">
-			<?php foreach ($steps as $n => $label): ?>
-				<span class="<?php echo ((int) $n === (int) $step) ? 'active' : ''; ?>"><?php echo $n; ?>. <?php echo $label; ?></span>
-			<?php endforeach; ?>
+?>
+	<!doctype html>
+	<html lang="ar" dir="rtl">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>تثبيت أُعجوبة — <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></title>
+		<style>
+			body {
+				font-family: -apple-system, Segoe UI, Tahoma, Arial, sans-serif;
+				background: #f4f3fb;
+				margin: 0;
+				color: #1b1730
+			}
+
+			.wrap {
+				max-width: 640px;
+				margin: 40px auto;
+				padding: 0 20px
+			}
+
+			.card {
+				background: #fff;
+				border-radius: 14px;
+				box-shadow: 0 8px 30px rgba(30, 20, 80, .08);
+				padding: 32px
+			}
+
+			h1 {
+				font-size: 22px;
+				margin: 0 0 4px
+			}
+
+			.sub {
+				color: #847f9c;
+				margin: 0 0 24px;
+				font-size: 14px
+			}
+
+			.steps {
+				display: flex;
+				gap: 8px;
+				margin-bottom: 28px;
+				flex-wrap: wrap
+			}
+
+			.steps span {
+				flex: 1;
+				text-align: center;
+				padding: 8px 4px;
+				border-radius: 8px;
+				font-size: 12px;
+				background: #f0eefb;
+				color: #847f9c
+			}
+
+			.steps span.active {
+				background: #5b3df6;
+				color: #fff;
+				font-weight: bold
+			}
+
+			label {
+				display: block;
+				margin: 14px 0 6px;
+				font-size: 14px;
+				font-weight: 600
+			}
+
+			input[type=text],
+			input[type=email],
+			input[type=password],
+			select,
+			textarea {
+				width: 100%;
+				padding: 10px 12px;
+				border: 1px solid #e2e0f0;
+				border-radius: 8px;
+				font-size: 14px;
+				box-sizing: border-box;
+				font-family: inherit
+			}
+
+			textarea {
+				resize: vertical;
+				min-height: 70px
+			}
+
+			button {
+				margin-top: 22px;
+				background: #5b3df6;
+				color: #fff;
+				border: 0;
+				padding: 12px 22px;
+				border-radius: 8px;
+				font-size: 15px;
+				cursor: pointer
+			}
+
+			button:hover {
+				background: #4a2fe0
+			}
+
+			a.btn {
+				display: inline-block;
+				margin-top: 22px;
+				background: #5b3df6;
+				color: #fff;
+				padding: 12px 22px;
+				border-radius: 8px;
+				text-decoration: none;
+				font-size: 15px
+			}
+
+			.req {
+				display: flex;
+				justify-content: space-between;
+				padding: 10px 0;
+				border-bottom: 1px solid #f0eefb;
+				font-size: 14px
+			}
+
+			.ok {
+				color: #1fa971;
+				font-weight: bold
+			}
+
+			.bad {
+				color: #e5484d;
+				font-weight: bold
+			}
+
+			.err {
+				background: #fdecec;
+				color: #c92a2a;
+				padding: 10px 14px;
+				border-radius: 8px;
+				margin-bottom: 14px;
+				font-size: 14px
+			}
+
+			code {
+				background: #f0eefb;
+				padding: 2px 6px;
+				border-radius: 4px
+			}
+
+			.hint {
+				color: #847f9c;
+				font-size: 12px;
+				margin-top: 4px
+			}
+
+			fieldset {
+				border: 1px solid #f0eefb;
+				border-radius: 10px;
+				padding: 12px 14px 4px;
+				margin-top: 18px
+			}
+
+			legend {
+				padding: 0 6px;
+				font-size: 13px;
+				font-weight: 600;
+				color: #5b3df6
+			}
+
+			.select2-container {
+				margin-top: 2px
+			}
+		</style>
+		<?php echo $extraHead; ?>
+	</head>
+
+	<body>
+		<div class="wrap">
+			<div class="card">
+				<h1>تثبيت أُعجوبة</h1>
+				<p class="sub"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></p>
+				<div class="steps">
+					<?php foreach ($steps as $n => $label): ?>
+						<span class="<?php echo ((int) $n === (int) $step) ? 'active' : ''; ?>"><?php echo $n; ?>. <?php echo $label; ?></span>
+					<?php endforeach; ?>
+				</div>
+				<?php foreach ($errors as $e): ?>
+					<div class="err"><?php echo htmlspecialchars($e, ENT_QUOTES, 'UTF-8'); ?></div>
+				<?php endforeach; ?>
+				<?php echo $bodyHtml; ?>
+			</div>
 		</div>
-		<?php foreach ($errors as $e): ?>
-			<div class="err"><?php echo htmlspecialchars($e, ENT_QUOTES, 'UTF-8'); ?></div>
-		<?php endforeach; ?>
-		<?php echo $bodyHtml; ?>
-	</div>
-</div>
-</body>
-</html>
-	<?php
+	</body>
+
+	</html>
+<?php
 	return ob_get_clean();
 }
 
 // ===== عرض الخطوة الحالية =====
 if ($step === 1) {
 	ob_start();
-	?>
+?>
 	<?php foreach ($requirements as $r): ?>
 		<div class="req"><span><?php echo htmlspecialchars($r['label'], ENT_QUOTES, 'UTF-8'); ?></span><span class="<?php echo $r['ok'] ? 'ok' : 'bad'; ?>"><?php echo $r['ok'] ? 'جاهز ✓' : 'غير متوفر ✗'; ?></span></div>
 	<?php endforeach; ?>
@@ -517,11 +706,11 @@ if ($step === 1) {
 	<?php else: ?>
 		<a class="btn" href="?step=2">متابعة</a>
 	<?php endif; ?>
-	<?php
+<?php
 	echo installerLayout(1, 'فحص متطلبات السيرفر', ob_get_clean(), $errors);
 } elseif ($step === 2) {
 	ob_start();
-	?>
+?>
 	<form method="post" action="?step=2">
 		<label>عنوان سيرفر قاعدة البيانات (Host)</label>
 		<input type="text" name="db_host" value="<?php echo htmlspecialchars($dbFormValues['host'], ENT_QUOTES, 'UTF-8'); ?>" required>
@@ -533,12 +722,12 @@ if ($step === 1) {
 		<input type="text" name="db_name" value="<?php echo htmlspecialchars($dbFormValues['name'], ENT_QUOTES, 'UTF-8'); ?>" required>
 		<button type="submit" name="db_submit">اختبار الاتصال والمتابعة</button>
 	</form>
-	<?php
+<?php
 	echo installerLayout(2, 'بيانات الاتصال بقاعدة البيانات', ob_get_clean(), $errors);
 } elseif ($step === 3) {
 	$biz = installerBusinessTypeOptions();
 	ob_start();
-	?>
+?>
 	<form method="post" action="?step=3" id="siteInfoForm">
 		<label>رابط الموقع الكامل</label>
 		<input type="text" name="site_url" dir="ltr" value="<?php echo htmlspecialchars($siteInfoValues['site_url'], ENT_QUOTES, 'UTF-8'); ?>" required>
@@ -586,19 +775,26 @@ if ($step === 1) {
 			var mode = document.getElementById('language_mode_select').value;
 			var showAr = (mode === 'both' || mode === 'ar');
 			var showEn = (mode === 'both' || mode === 'en');
-			document.querySelectorAll('.lang-ar').forEach(function (el) {
+			document.querySelectorAll('.lang-ar').forEach(function(el) {
 				el.style.display = showAr ? '' : 'none';
-				el.querySelectorAll('input,textarea').forEach(function (i) { i.required = showAr; });
+				el.querySelectorAll('input,textarea').forEach(function(i) {
+					i.required = showAr;
+				});
 			});
-			document.querySelectorAll('.lang-en').forEach(function (el) {
+			document.querySelectorAll('.lang-en').forEach(function(el) {
 				el.style.display = showEn ? '' : 'none';
-				el.querySelectorAll('input,textarea').forEach(function (i) { i.required = showEn; });
+				el.querySelectorAll('input,textarea').forEach(function(i) {
+					i.required = showEn;
+				});
 			});
 		}
 		document.getElementById('language_mode_select').addEventListener('change', ojubaUpdateLangFields);
 		ojubaUpdateLangFields();
 		if (window.jQuery) {
-			jQuery('#business_type_select').select2({ width: '100%', dir: 'rtl' });
+			jQuery('#business_type_select').select2({
+				width: '100%',
+				dir: 'rtl'
+			});
 		}
 	</script>
 	<?php
@@ -612,10 +808,10 @@ if ($step === 1) {
 		echo '<p>حدث خطأ أثناء استيراد بنية قاعدة البيانات — راجع الرسالة أعلاه، ثم أعد المحاولة.</p>';
 		echo '<a class="btn" href="?step=4">إعادة المحاولة</a>';
 	} else {
-		?>
+	?>
 		<p>تم إنشاء جداول قاعدة البيانات بنجاح<?php echo $schemaResults ? ' (' . (int) $schemaResults['ok'] . ' جملة SQL نُفِّذت بنجاح)' : ' (كانت مُجهَّزة مسبقاً)'; ?>.</p>
 		<a class="btn" href="?step=5">متابعة لإنشاء حساب المالك</a>
-		<?php
+	<?php
 	}
 	echo installerLayout(4, 'استيراد بنية قاعدة البيانات', ob_get_clean(), []);
 } elseif ($step === 5) {
@@ -632,7 +828,7 @@ if ($step === 1) {
 		<input type="password" name="owner_confirm" required>
 		<button type="submit" name="owner_submit">إنشاء الحساب وإنهاء التثبيت</button>
 	</form>
-	<?php
+<?php
 	echo installerLayout(5, 'إنشاء حساب المالك (Owner)', ob_get_clean(), $errors);
 } elseif ($step === 6) {
 	echo installerLayout(6, 'اكتمل التثبيت 🎉', '<p>تم تثبيت السكربت بنجاح.</p><p><b>مهم: احذف مجلد install/ بالكامل من الاستضافة الآن لأسباب أمنية.</b></p><a class="btn" href="../abma/auth/login">الدخول إلى لوحة التحكم</a>', []);
