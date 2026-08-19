@@ -19,7 +19,7 @@ if (is_file($configPath)) {
 			$adminCount = (int) $guardCon->query("SELECT COUNT(*) FROM admins")->fetchColumn();
 			if ($adminCount > 0) {
 				http_response_code(403);
-				die('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>مثبَّت بالفعل</title></head><body style="font-family:sans-serif;text-align:center;padding:100px 20px;background:#f6f5fb"><h2>السكربت مثبَّت بالفعل</h2><p style="color:#666">لأسباب أمنية، لا يمكن إعادة تشغيل معالج التثبيت على تركيبة قائمة.</p><p><b>يُنصح بشدة بحذف مجلد install/ بالكامل من الاستضافة الآن.</b></p><p><a href="../abma/auth/login">الذهاب لتسجيل الدخول</a></p></body></html>');
+				die('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تم التثبيت بنجاح</title></head><body style="font-family:sans-serif;text-align:center;padding:100px 20px;background:#f6f5fb"><h2>تم التثبيت بنجاح</h2><p style="color:#666">الحمدلله الذي سخّر لنا هذا، شكرًا لاستخدامكم سكربت <a href="https://ojuba.net" target="_blank">أُعجوبة</a>.</p><p><b>يُنصح بشدة بحذف مجلد install/ بالكامل من الاستضافة الآن.</b></p><p><a href="../abma/auth/login">الذهاب لتسجيل الدخول</a></p></body></html>');
 			}
 		}
 	} catch (\Throwable $e) {
@@ -32,21 +32,6 @@ $step = max(1, min(6, (int) ($_GET['step'] ?? 1)));
 $errors = [];
 $dbFormValues = ['host' => 'localhost', 'user' => 'root', 'pass' => '', 'name' => 'ojuba'];
 
-/**
- * استخراج جمل CREATE TABLE / ALTER TABLE (المفاتيح الأساسية وAUTO_INCREMENT)
- * فقط من db.sql — تتجاهل عمداً كل جمل INSERT INTO (بيانات تجريبية شخصية
- * لمطوّر السكربت لا يجب أن تصل لأي تركيبة جديدة). تُنظِّف أيضاً أي قيمة
- * AUTO_INCREMENT=N رقمية موروثة من بيانات المطوّر (التركيبة الجديدة يجب أن
- * تبدأ ترقيمها من 1 دائماً بما أننا لا نستورد أي صف).
- *
- * ملاحظة مهمة (خطأ اكتُشِف وأُصلِح): كل جملة بملف تصدير phpMyAdmin مسبوقة
- * بأسطر تعليق SQL (تبدأ بـ --) ضمن نفس القطعة المفصولة بالفاصلة المنقوطة —
- * مثال: "--\n-- Table structure for table `admins`\n--\n\nCREATE TABLE...".
- * التحقق من بداية القطعة مباشرة بـ CREATE/ALTER TABLE (بدون تجريد أسطر
- * التعليق أولاً) كان يفشل دائماً لكل جدول، ما يعني عملياً **صفر جداول تُستورَد
- * بأي تثبيت جديد**. الإصلاح: تجريد أسطر التعليق (والأسطر الفارغة) من بداية كل
- * قطعة عبر installerStripLeadingComments() قبل فحص البادئة.
- */
 function installerStripLeadingComments($chunk)
 {
 	$lines = explode("\n", $chunk);
@@ -88,17 +73,6 @@ function installerDetectSiteUrl()
 	return $scheme . $host . $dir . '/';
 }
 
-/**
- * تحديث سطرَي .htaccess اللذين يعتمدان على المسار الفعلي للتركيبة على القرص
- * (وليس على رابط الموقع نفسه):
- * - php_value include_path — المسار المطلق الحقيقي لجذر المشروع على السيرفر
- *   (يختلف حتماً عن مسار مطوّر السكربت الأصلي المُثبَّت افتراضياً بالملف).
- * - ErrorDocument (404/500/401/403) — يجب أن تبدأ بمسار المجلد الفرعي
- *   (site_folder) إن كان السكربت مثبَّتاً داخل مجلد فرعي، أو بدون أي بادئة إن
- *   كان مثبَّتاً بجذر النطاق مباشرة.
- * لا تلمس أي سطر آخر بالملف (بما فيها كتلة BEGIN/END CUSTOM ROUTES المُدارة
- * بدالة أخرى تماماً — regenerateRouteHtaccess() بـ includes/functions.php).
- */
 function installerUpdateHtaccess($rootDir, $siteFolder)
 {
 	$htaccessPath = $rootDir . '.htaccess';
@@ -120,15 +94,7 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 	return @file_put_contents($htaccessPath, $content) !== false;
 }
 
-/**
- * js/functions.js يحمل مساراً مطلقاً ثابتاً لملف ترجمة نصوص JS
- * (SweetAlert2...): `url: "/cms/includes/lang/" + languFile,` — "cms" هنا هو
- * اسم مجلد بيئة تطوير السكربت الأصلية، وليس شيئاً عاماً. إن بقي كما هو، ستفشل
- * كل تنبيهات SweetAlert2 (تظهر بلا نص) في أي تركيبة لا تحمل هذا الاسم بالضبط.
- * نفس منطق installerUpdateHtaccess() بالضبط: نستبدله بمسار المجلد الفرعي
- * الصحيح (site_folder) إن وُجد، أو نزيله بالكامل إن كان السكربت مثبَّتاً بجذر
- * النطاق مباشرة.
- */
+
 function installerUpdateFunctionsJs($rootDir, $siteFolder)
 {
 	$jsPath = $rootDir . 'js/functions.js';
@@ -143,16 +109,7 @@ function installerUpdateFunctionsJs($rootDir, $siteFolder)
 	return @file_put_contents($jsPath, $content) !== false;
 }
 
-/**
- * .user.ini (بجذر المشروع) — يُستخدَم على استضافات PHP-FPM/CGI حيث php_value
- * بـ.htaccess لا يُطبَّق (خلافاً لـmod_php)، فهو يكرّر نفس القيم بصيغة .ini:
- * open_basedir (قصر وصول PHP على مجلد الموقع + /tmp فقط، أمان أساسي) و
- * include_path — كلاهما يحتاج المسار الحقيقي المطلق لجذر التركيبة على القرص،
- * تماماً مثل سطر include_path بـ.htaccess (installerUpdateHtaccess() أعلاه) —
- * نفس $realPath يُستخدَم هنا لضمان تطابق القيمتين دائماً. auto_prepend_file/
- * auto_append_file لا يحتاجان تعديلاً (قيمتاهما عامة أصلاً). الملف قد لا يكون
- * موجوداً على كل الاستضافات (مثل بيئات mod_php المحلية) — لا نعتبر غيابه خطأ.
- */
+
 function installerUpdateUserIni($rootDir)
 {
 	$iniPath = $rootDir . '.user.ini';
@@ -170,13 +127,6 @@ function installerUpdateUserIni($rootDir)
 	return @file_put_contents($iniPath, $content) !== false;
 }
 
-/**
- * نسخة محلية من businessTypeOptions() (includes/functions.php) — مكرَّرة عمداً
- * هنا بدل تحميل functions.php كاملاً بهذه المرحلة المبكرة، لأن functions.php
- * يستدعي gsite() فوراً عند تحميله وهي تفشل بخطأ قاتل قبل وجود جدول settings.
- * يجب إبقاء هذه القائمة مطابقة تماماً لنظيرتها بـ includes/functions.php عند
- * أي تعديل مستقبلي على أنواع الأنشطة المتاحة.
- */
 function installerBusinessTypeOptions()
 {
 	return [
@@ -212,9 +162,7 @@ if ($step === 2 && isset($_POST['db_submit'])) {
 				$dbFormValues['pass'],
 				[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
 			);
-			// أنشئ قاعدة البيانات إن لم تكن موجودة أصلاً (بعض الاستضافات تجهّزها
-			// مسبقاً ولا تسمح بإنشائها من المستخدم؛ نتجاهل فشل هذه الخطوة بصمت
-			// ونحاول الاتصال المباشر بها مباشرة بعدها).
+			// أنشئ قاعدة البيانات إن لم تكن موجودة أصلاً 
 			try {
 				$testCon->exec("CREATE DATABASE IF NOT EXISTS `" . str_replace('`', '', $dbFormValues['name']) . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
 			} catch (\Throwable $e) {
@@ -257,9 +205,8 @@ if ($step === 2 && isset($_POST['db_submit'])) {
 	}
 }
 
-// ===== الخطوة 3: معلومات الموقع (رابط الموقع، اللغة، الاسم/الوصف/الكلمات
+// الخطوة 3: معلومات الموقع (رابط الموقع، اللغة، الاسم/الوصف/الكلمات
 // الدلالية حسب اللغة المختارة، نوع النشاط) — تُخزَّن بالجلسة لحين تنفيذ
-// الاستيراد الفعلي بالخطوة التالية =====
 $siteInfoDefaults = [
 	'site_url' => installerDetectSiteUrl(),
 	'language_mode' => 'both',
@@ -312,10 +259,6 @@ if ($step === 3 && isset($_POST['site_submit'])) {
 		$siteFolder = trim(parse_url($siteUrl, PHP_URL_PATH) ?? '', '/');
 
 		// تحديث .htaccess بالمسار الحقيقي على القرص + بادئة المجلد الفرعي الصحيحة
-		// لأسطر ErrorDocument، تحديث مسار ملف ترجمة JS بنفس البادئة، وتحديث
-		// .user.ini (open_basedir/include_path لاستضافات PHP-FPM) بنفس المسار
-		// الحقيقي المستخدَم بـ.htaccess — لا يوقف التثبيت إن فشل أيّ منها
-		// (صلاحيات كتابة مثلاً، أو عدم وجود .user.ini أصلاً على بعض البيئات).
 		installerUpdateHtaccess($rootDir, $siteFolder);
 		installerUpdateFunctionsJs($rootDir, $siteFolder);
 		installerUpdateUserIni($rootDir);
@@ -328,7 +271,7 @@ if ($step === 3 && isset($_POST['site_submit'])) {
 	}
 }
 
-// ===== الخطوة 4: استيراد بنية قاعدة البيانات (تلقائي عند تحميل الصفحة) =====
+// ===== الخطوة 4: استيراد بنية قاعدة البيانات =====
 $schemaResults = null;
 if ($step === 4) {
 	if (!is_file($configPath)) {
@@ -346,7 +289,7 @@ if ($step === 4) {
 		if (!$alreadyInstalled) {
 			$sqlDump = @file_get_contents($installDir . 'db.sql');
 			if ($sqlDump === false) {
-				$errors[] = 'تعذّر قراءة ملف db.sql داخل مجلد install/';
+				$errors[] = 'تعذّر قراءة ملف قاعدة البيانات (db.sql) داخل مجلد install/';
 			} else {
 				$statements = installerExtractSchemaStatements($sqlDump);
 				$schemaResults = ['ok' => 0, 'fail' => 0, 'errors' => []];
@@ -360,10 +303,6 @@ if ($step === 4) {
 					}
 				}
 
-				// زرع صف إعدادات مبني على ما أدخله صاحب الموقع فعلياً بالخطوة السابقة
-				// (رابط الموقع، اللغة، الاسم/الوصف/الكلمات الدلالية، نوع النشاط) — بدل
-				// قيم افتراضية ثابتة. القيم المتبقية غير المُدخَلة تعتمد على fallback
-				// الافتراضي بدالة gsite() (functions.php).
 				$submitted = $_SESSION['install_site_info'];
 				$siteFolder = $_SESSION['install_site_folder'] ?? trim(parse_url($submitted['site_url'], PHP_URL_PATH) ?? '', '/');
 				$defaultSettings = [
@@ -504,9 +443,12 @@ function installerLayout($step, $title, $bodyHtml, $errors = [], $extraHead = ''
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>تثبيت أُعجوبة — <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
 		<style>
 			body {
-				font-family: -apple-system, Segoe UI, Tahoma, Arial, sans-serif;
+				font-family: 'Tajawal', Segoe UI, Tahoma, Arial, sans-serif;
 				background: #f4f3fb;
 				margin: 0;
 				color: #1b1730
@@ -577,7 +519,7 @@ function installerLayout($step, $title, $bodyHtml, $errors = [], $extraHead = ''
 				border-radius: 8px;
 				font-size: 14px;
 				box-sizing: border-box;
-				font-family: inherit
+				font-family: 'Tajawal'
 			}
 
 			textarea {
