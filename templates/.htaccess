@@ -39,5 +39,10 @@ RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .pht
     </IfModule>
 </FilesMatch>
 
-# منع تشغيل CGI ومنع عرض محتويات المجلدات
-Options -Indexes -ExecCGI -MultiViews
+# منع عرض محتويات المجلدات (Options -ExecCGI أُزيلت عمداً: بعض الاستضافات تمنع
+# AllowOverride لخيار ExecCGI تحديداً مما يُسبِّب خطأ 500 لكل المجلد بمجرد وجود
+# هذا السطر بـ.htaccess، بغض النظر عن أي <IfModule> — لا يوجد شرط يمكن التحقق
+# منه هنا لأن القيد مصدره إعداد AllowOverride بالسيرفر نفسه وليس وجود/غياب وحدة.
+# منع تنفيذ PHP فعلياً مُغطّى بالكامل أصلاً بطبقتَي RemoveHandler/RemoveType
+# وFilesMatch+Deny أعلاه، فحذف -ExecCGI هنا لا يُضعف الحماية الفعلية إطلاقاً.
+Options -Indexes -MultiViews

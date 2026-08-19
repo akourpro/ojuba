@@ -1,5 +1,6 @@
 <?php
 
+
 session_start();
 
 // $installDir: مجلد هذا الملف نفسه (install/) — يُستخدم فقط لقراءة db.sql المجاور.
@@ -85,7 +86,11 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 	$realPath = rtrim(str_replace('\\', '/', $real !== false ? $real : $rootDir), '/') . '/';
 	$prefix = $siteFolder !== '' ? '/' . trim($siteFolder, '/') : '';
 
-	$content = preg_replace('/^php_value include_path ".*"$/m', 'php_value include_path "' . $realPath . '"', $content, 1);
+	// أسطر php_value include_path مكرَّرة 3 مرات (داخل <IfModule mod_php.c>/mod_php7.c/
+	// mod_php8.c> — راجع تعليق أعلى هذه الكتلة بـ.htaccess نفسه لسبب التكرار)، وكل
+	// سطر مسبوق بمسافات بادئة (indentation) داخل الكتلة، لذا بدون حد أقصى للاستبدال
+	// (لا `, 1`) ومع السماح بمسافات بادئة اختيارية بالنمط.
+	$content = preg_replace('/^\s*php_value include_path ".*"$/m', '    php_value include_path "' . $realPath . '"', $content);
 	$content = preg_replace('/^ErrorDocument 404 .*$/m', 'ErrorDocument 404 ' . $prefix . '/errors/404.php', $content, 1);
 	$content = preg_replace('/^ErrorDocument 500 .*$/m', 'ErrorDocument 500 ' . $prefix . '/errors/500.php', $content, 1);
 	$content = preg_replace('/^ErrorDocument 401 .*$/m', 'ErrorDocument 401 ' . $prefix . '/errors/401.php', $content, 1);
@@ -93,7 +98,6 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 
 	return @file_put_contents($htaccessPath, $content) !== false;
 }
-
 
 function installerUpdateFunctionsJs($rootDir, $siteFolder)
 {
@@ -126,6 +130,7 @@ function installerUpdateUserIni($rootDir)
 
 	return @file_put_contents($iniPath, $content) !== false;
 }
+
 
 function installerBusinessTypeOptions()
 {
@@ -205,8 +210,7 @@ if ($step === 2 && isset($_POST['db_submit'])) {
 	}
 }
 
-// الخطوة 3: معلومات الموقع (رابط الموقع، اللغة، الاسم/الوصف/الكلمات
-// الدلالية حسب اللغة المختارة، نوع النشاط) — تُخزَّن بالجلسة لحين تنفيذ
+//  الخطوة 3: معلومات الموقع (رابط الموقع، اللغة، الاسم/الوصف/الكلمات
 $siteInfoDefaults = [
 	'site_url' => installerDetectSiteUrl(),
 	'language_mode' => 'both',
@@ -258,7 +262,6 @@ if ($step === 3 && isset($_POST['site_submit'])) {
 		$siteInfoValues['site_url'] = $siteUrl;
 		$siteFolder = trim(parse_url($siteUrl, PHP_URL_PATH) ?? '', '/');
 
-		// تحديث .htaccess بالمسار الحقيقي على القرص + بادئة المجلد الفرعي الصحيحة
 		installerUpdateHtaccess($rootDir, $siteFolder);
 		installerUpdateFunctionsJs($rootDir, $siteFolder);
 		installerUpdateUserIni($rootDir);
@@ -289,7 +292,7 @@ if ($step === 4) {
 		if (!$alreadyInstalled) {
 			$sqlDump = @file_get_contents($installDir . 'db.sql');
 			if ($sqlDump === false) {
-				$errors[] = 'تعذّر قراءة ملف قاعدة البيانات (db.sql) داخل مجلد install/';
+				$errors[] = 'تعذّر قراءة ملف db.sql داخل مجلد install/';
 			} else {
 				$statements = installerExtractSchemaStatements($sqlDump);
 				$schemaResults = ['ok' => 0, 'fail' => 0, 'errors' => []];
@@ -303,6 +306,10 @@ if ($step === 4) {
 					}
 				}
 
+				// زرع صف إعدادات مبني على ما أدخله صاحب الموقع فعلياً بالخطوة السابقة
+				// (رابط الموقع، اللغة، الاسم/الوصف/الكلمات الدلالية، نوع النشاط) — بدل
+				// قيم افتراضية ثابتة. القيم المتبقية غير المُدخَلة تعتمد على fallback
+				// الافتراضي بدالة gsite() (functions.php).
 				$submitted = $_SESSION['install_site_info'];
 				$siteFolder = $_SESSION['install_site_folder'] ?? trim(parse_url($submitted['site_url'], PHP_URL_PATH) ?? '', '/');
 				$defaultSettings = [
