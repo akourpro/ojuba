@@ -1252,22 +1252,26 @@ function login_check_admin()
 {
 	global $rows;
 	global $countrows;
-	// Check if all session variables are set 
+	// Check if all session variables are set
 	if (!empty($_SESSION['user_id'])) {
 		$user_id = numer($_SESSION['user_id']);
-		$login_string = $_SESSION['login_string'];
+		$login_string = $_SESSION['login_string'] ?? '';
 		// Get the user-agent string of the user.
 		$user_browser = $_SERVER['HTTP_USER_AGENT'];
 		$user_browser = 1;
 		dbSelect("admins", "password", "WHERE id=? LIMIT 1", [$user_id]);
-		$user_pass = $rows[0]["password"];
+		// تحقّق من وجود الصف فعلياً قبل قراءة $rows[0] — جلسة قديمة/كوكي قديم
+		// يحمل user_id لم يعد له صف حقيقي بجدول admins (حساب محذوف، أو قاعدة
+		// بيانات أُعيد تثبيتها) كان يسبب تحذير PHP "Undefined array key 0" هنا
+		// قبل هذا الإصلاح، لأن $rows[0] كانت تُقرأ قبل التحقق من $countrows.
 		if ($countrows == 1) {
+			$user_pass = $rows[0]["password"];
 			$login_check = hash('sha512', $user_pass . $user_browser);
 			if (hash_equals($login_check, $login_string)) {
-				// Logged In!!!! 
+				// Logged In!!!!
 				return true;
 			} else {
-				// Not logged in 
+				// Not logged in
 				return false;
 			}
 		} else {
