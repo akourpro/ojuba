@@ -34,7 +34,7 @@ if (is_file($maintenanceFlag) && !$isApiRequest) {
 previewModeInit();
 
 include_once 'includes/csrf.php';
-$csrf = new CSRF_Protect('_csrf', "DOCS-abma");
+$csrf = new CSRF_Protect('_csrf', "OJUBA-abma");
 
 
 

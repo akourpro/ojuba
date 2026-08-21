@@ -1342,7 +1342,7 @@ function requireOwner()
  * بشكل قالب آخر غير القالب النشط فعلياً بقاعدة البيانات، دون تغيير settings.theme
  * إطلاقاً. الآلية:
  *   - ?start_preview=SLUG (من زر "معاينة" بصفحة abma/templates.php) يبدأ المعاينة.
- *   - يُخزَّن اختيار القالب المؤقت داخل جلسة لوحة التحكم نفسها (DOCS-abma)، لذلك
+ *   - يُخزَّن اختيار القالب المؤقت داخل جلسة لوحة التحكم نفسها (OJUBA-abma)، لذلك
  *     يبقى فعّالاً أثناء تصفح كل صفحات الموقع (وليس الرئيسية فقط) إلى أن يُنهيها.
  *   - ?stop_preview=1 يُنهي المعاينة ويعيد $site['theme'] لقيمته الفعلية.
  *   - شريط عائم يُضاف تلقائياً لأي صفحة تُعرض عبر safeRender() أثناء المعاينة
@@ -1350,7 +1350,7 @@ function requireOwner()
  *     قالب Twig، ويعمل مع الـ 14 قالباً كلها بالتساوي.
  * أمان: لا تُغيّر أي بيانات دائمة بقاعدة البيانات (لا تكتب settings.theme إطلاقاً)،
  * فقط تُبدّل $site['theme'] بالذاكرة لهذا الطلب + علم بجلسة الأدمن الحالية، ولا
- * تعمل إطلاقاً إلا لمن يملك كوكي جلسة لوحة التحكم (DOCS-abma) أصلاً ويتحقق أنه owner
+ * تعمل إطلاقاً إلا لمن يملك كوكي جلسة لوحة التحكم (OJUBA-abma) أصلاً ويتحقق أنه owner
  * فعلياً — لذلك اعتُمد رابط GET بسيط بدل نموذج CSRF كامل. يجب استدعاؤها من
  * autoload.php الجذر بعد تحميل functions.php وقبل twigload.php مباشرة.
  */
@@ -1360,13 +1360,13 @@ function previewModeInit()
 
 	// لا نفتح أي جلسة لزوار الموقع العاديين (ليس لديهم كوكي جلسة لوحة التحكم أصلاً)
 	// هذا يحافظ على أداء وسلوك الموقع العام كما هو تماماً بدون أي تأثير.
-	if (!isset($_COOKIE['DOCS-abma'])) {
+	if (!isset($_COOKIE['OJUBA-abma'])) {
 		return;
 	}
 
 	$cookieParams = session_get_cookie_params();
 	session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], true, true);
-	session_name("DOCS-abma");
+	session_name("OJUBA-abma");
 	@session_start();
 
 	// ملاحظة: لا نستدعي session_regenerate_id() هنا كما تفعل sec_session_start()،
