@@ -18,6 +18,16 @@
  * على ملفات قالب رسمي (مثل templates/workup) سيُستبدَل بالتحديث لأن هذا
  * القالب جزء من المستودع نفسه — هذا سلوك متوقّع ويجب توضيحه للمستخدم بواجهة
  * صفحة التحديثات قبل أي تطبيق.
+ *
+ * .htaccess/.user.ini/js/functions.js **ليست** مستثناة من النسخ (تُستبدَل
+ * بالنسخة الخام من GitHub في كل تحديث، لتصل أي قواعد Rewrite/حماية جديدة
+ * فعلاً لكل المواقع المثبَّتة) — لكن مباشرة بعد النسخ تُستدعى
+ * updaterReapplySiteEnvironmentPaths() لإعادة كتابة القيم الخاصة بهذا الموقع
+ * تحديداً (المسار الحقيقي على القرص، مجلد الموقع الفرعي) فوق النسخة الخام،
+ * تماماً كما تُعاد كتابة كتلة روابط المسارات المخصَّصة عبر
+ * regenerateRouteHtaccess() بعدها مباشرة. **بدون هذه الخطوة يُعيد كل تحديث
+ * سكربت ضبط `php_value include_path` على مسار بيئة تطوير السكربت نفسه بدل
+ * مسار الاستضافة الفعلي — خطأ حقيقي اكتُشِف بواسطة مستخدم بعد أول تحديث حي.**
  */
 
 const UPDATER_REPO = 'akourpro/ojuba';
@@ -360,6 +370,71 @@ function updaterPathIsExcluded($relativePath, $excludes)
 		}
 	}
 	return false;
+}
+
+/**
+ * إعادة تطبيق القيم الخاصة بهذا الموقع تحديداً على .htaccess/.user.ini/
+ * js/functions.js مباشرة بعد نسخ ملفات التحديث — نفس فلسفة
+ * regenerateRouteHtaccess() (إعادة تطبيق روابط المسارات المخصَّصة فوق أي
+ * تحديث لقواعد .htaccess الأساسية) لكن لثلاثة ملفات إضافية اكتُشِفت المشكلة
+ * فيها بواسطة مستخدم حقيقي: نسخ ملفات التحديث (updaterCopyTree) يستبدل هذه
+ * الملفات بالنسخة الخام كما هي بمستودع GitHub — وهي تحمل مساراً افتراضياً
+ * (بيئة تطوير السكربت نفسه، مثل `/Applications/XAMPP/htdocs/ojuba/`)، وليس
+ * المسار الحقيقي لهذا الموقع على استضافته الفعلية. بدون إعادة التطبيق هذه،
+ * أي تحديث سكربت يُعيد ضبط `php_value include_path` (وما يعادلها بـ
+ * .user.ini) لمسار خاطئ تماماً، فيكسر تحميل الملفات (`autoload.php` وغيره)
+ * فوراً بعد كل تحديث حتى لو نجحت كل خطوات النسخ الأخرى بلا أي خطأ ظاهر.
+ * لا تفشل عملية التحديث كاملة إن تعذّر أيّ من هذه الثلاث (صلاحيات كتابة
+ * مثلاً، أو عدم وجود .user.ini أصلاً على بعض البيئات) — نفس اصطلاح استدعاءات
+ * installerUpdateHtaccess()/installerUpdateUserIni()/installerUpdateFunctionsJs()
+ * غير الفاشلة بخطوة "معلومات الموقع" بمعالج التثبيت (install/index.php)، التي
+ * تكرَّر منطقها هنا عمداً (وليس عبر require) لأن install/index.php مستقل
+ * تماماً عن سلسلة تحميل functions.php/updater.php حتى خطواته الأخيرة فقط.
+ */
+function updaterReapplySiteEnvironmentPaths($rootDir)
+{
+	$rootDir = rtrim($rootDir, '/') . '/';
+
+	global $site;
+	$siteFolder = trim($site['site_folder'] ?? '', '/');
+	$prefix = $siteFolder !== '' ? '/' . $siteFolder : '';
+
+	$real = realpath($rootDir);
+	$realPath = rtrim(str_replace('\\', '/', $real !== false ? $real : $rootDir), '/') . '/';
+
+	// .htaccess: أسطر php_value include_path (مكرَّرة 3 مرات داخل كتل
+	// <IfModule mod_php.c>/mod_php7.c/mod_php8.c>) + أسطر ErrorDocument الأربعة
+	$htaccessPath = $rootDir . '.htaccess';
+	$htaccessContent = @file_get_contents($htaccessPath);
+	if ($htaccessContent !== false) {
+		$htaccessContent = preg_replace('/^\s*php_value include_path ".*"$/m', '    php_value include_path "' . $realPath . '"', $htaccessContent);
+		$htaccessContent = preg_replace('/^ErrorDocument 404 .*$/m', 'ErrorDocument 404 ' . $prefix . '/errors/404.php', $htaccessContent, 1);
+		$htaccessContent = preg_replace('/^ErrorDocument 500 .*$/m', 'ErrorDocument 500 ' . $prefix . '/errors/500.php', $htaccessContent, 1);
+		$htaccessContent = preg_replace('/^ErrorDocument 401 .*$/m', 'ErrorDocument 401 ' . $prefix . '/errors/401.php', $htaccessContent, 1);
+		$htaccessContent = preg_replace('/^ErrorDocument 403 .*$/m', 'ErrorDocument 403 ' . $prefix . '/errors/404.php', $htaccessContent, 1);
+		@file_put_contents($htaccessPath, $htaccessContent);
+	}
+
+	// .user.ini: open_basedir + include_path (النظير المتوافق مع استضافات PHP-FPM/CGI)
+	$iniPath = $rootDir . '.user.ini';
+	$iniContent = @file_get_contents($iniPath);
+	if ($iniContent !== false) {
+		$iniContent = preg_replace('/^open_basedir=.*$/m', 'open_basedir=' . $realPath . ':/tmp/', $iniContent, 1);
+		$iniContent = preg_replace('/^include_path=".*"$/m', 'include_path="' . $realPath . '"', $iniContent, 1);
+		@file_put_contents($iniPath, $iniContent);
+	}
+
+	// js/functions.js: مسار ترجمة SweetAlert2 الثابت — يعود دائماً لصيغته
+	// الأصلية "/cms/includes/lang/" بعد كل نسخ تحديث لأنه الملف الخام كما هو
+	// بمستودع GitHub، لذا الاستبدال الحرفي (وليس regex) يعمل بأمان في كل مرة.
+	$jsPath = $rootDir . 'js/functions.js';
+	$jsContent = @file_get_contents($jsPath);
+	if ($jsContent !== false) {
+		$jsContent = str_replace('"/cms/includes/lang/"', '"' . $prefix . '/includes/lang/"', $jsContent);
+		@file_put_contents($jsPath, $jsContent);
+	}
+
+	return true;
 }
 
 /**
@@ -773,9 +848,16 @@ function updaterApplyUpdate()
 		}
 		$push(true, 'تم استخراج ملفات الإصدار الجديد');
 
-		$copy = updaterCopyTree($extract['root'], rtrim(getpath(), '/'), updaterDefaultExcludes());
+		$rootDir = rtrim(getpath(), '/');
+		$copy = updaterCopyTree($extract['root'], $rootDir, updaterDefaultExcludes());
 		updaterRemoveDir($extractDir);
 		$push(true, 'تم نسخ ' . $copy['copied'] . ' ملفاً' . (!empty($copy['errors']) ? (' (تعذّر نسخ ' . count($copy['errors']) . ' ملف)') : ''));
+
+		// إعادة تطبيق المسار الحقيقي لهذا الموقع تحديداً على .htaccess/.user.ini/
+		// js/functions.js — النسخ أعلاه استبدلها بالنسخة الخام من GitHub التي تحمل
+		// مساراً افتراضياً (بيئة تطوير السكربت)، وليس مسار هذه الاستضافة الفعلي.
+		updaterReapplySiteEnvironmentPaths($rootDir);
+		$push(true, 'تمت إعادة تطبيق المسار الحقيقي لهذا الموقع على .htaccess/.user.ini');
 
 		if (function_exists('regenerateRouteHtaccess')) {
 			regenerateRouteHtaccess();

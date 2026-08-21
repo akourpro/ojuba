@@ -7,9 +7,21 @@ Options -Indexes -MultiViews +FollowSymlinks
 CheckSpelling off
 
 # auto include
-php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
-php_value auto_prepend_file autoload.php
-php_value auto_append_file none
+<IfModule mod_php.c>
+    php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
+    php_value auto_prepend_file autoload.php
+    php_value auto_append_file none
+</IfModule>
+<IfModule mod_php7.c>
+    php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
+    php_value auto_prepend_file autoload.php
+    php_value auto_append_file none
+</IfModule>
+<IfModule mod_php8.c>
+    php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
+    php_value auto_prepend_file autoload.php
+    php_value auto_append_file none
+</IfModule>
 
 #Routes
 RewriteEngine On
@@ -21,10 +33,6 @@ RewriteRule ^index/?$ home.php?lang= [QSA,L]
 RewriteRule ^en/?$ home.php?lang=en [QSA,L]
 RewriteRule ^ar/?$ home.php?lang=ar [QSA,L]
 
-# BEGIN CUSTOM ROUTES
-# تُدار هذه الكتلة تلقائياً عبر regenerateRouteHtaccess() (includes/functions.php)
-# كل مرة يحفظ صاحب الموقع روابط المسارات المخصصة من لوحة التحكم (الإعدادات ▸ روابط
-# المسارات). لا تُعدّل هذا القسم يدوياً — أي تعديل يدوي سيُستبدَل بالكامل عند أول حفظ.
 
 # Search
 RewriteRule ^search/?$ search.php?lang= [QSA,L]

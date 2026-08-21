@@ -2,8 +2,7 @@
 requireOwner();
 require_once 'includes/updater.php';
 
-// حفظ إعداد "قناة التحديثات الأمنية/التصحيحية" — نفس اصطلاح إجراءات GET
-// السريعة المحمية بـrequireOwner() المستخدم بصفحات أخرى.
+
 if (isset($_GET['save_patch_setting'])) {
   $autoPatch = isset($_GET['auto_patch']) ? '1' : '0';
   saveSetting('update_auto_apply_patches', $autoPatch);

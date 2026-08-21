@@ -1,7 +1,3 @@
-// صفحة "الإصدار والتحديثات" — نفس اصطلاح abma/js/feeds.js (SweetAlert2 + $.ajax
-// مع رأس _csrf من meta tag)، بإضافة نافذة تحميل لا تُغلَق أثناء تطبيق التحديث
-// الفعلي (قد يستغرق دقيقة أو أكثر حسب حجم الأرشيف وسرعة الاستضافة).
-
 $("#checkUpdateBtn").click(function () {
   var btn = $(this);
   btn.prop("disabled", true);
