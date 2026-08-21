@@ -445,7 +445,7 @@ if ($step === 5 && isset($_POST['owner_submit'])) {
 	} elseif (check($email, "email")) {
 		$errors[] = 'صيغة البريد الإلكتروني غير صحيحة';
 	} elseif (!isPasswordStrong($password)) {
-		$errors[] = 'كلمة المرور يجب ألا تقل عن 8 محارف وتحتوي على حرف ورقم على الأقل';
+		$errors[] = 'كلمة المرور يجب ألا تقل عن 8 حروف وتحتوي على حرف ورقم على الأقل';
 	} elseif ($password !== $confirm) {
 		$errors[] = 'كلمتا المرور غير متطابقتين';
 	} else {
@@ -814,7 +814,7 @@ if ($step === 1) {
 		<input type="text" name="owner_username" required>
 		<label>البريد الإلكتروني</label>
 		<input type="email" name="owner_email" required>
-		<label>كلمة المرور (8 محارف على الأقل، حرف ورقم)</label>
+		<label>كلمة المرور (8 حروف على الأقل، حرف ورقم)</label>
 		<input type="password" name="owner_password" required>
 		<label>تأكيد كلمة المرور</label>
 		<input type="password" name="owner_confirm" required>
