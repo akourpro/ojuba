@@ -887,7 +887,7 @@ require_once $__d . '/autoload.php';
         <h5 class="card-title">9.4 سحب المقالات (RSS/Feed) — استيراد تلقائي بالكامل من مواقع أخرى</h5>
         <p>وحدة اختيارية (الإضافات ▸ "سحب المقالات") تسمح لصاحب الموقع بإضافة مصادر RSS/Atom خارجية من <code>abma/feeds</code>، ليسحب السكربت مقالاتها تلقائياً بالكامل (بدون أي زر يدوي إلزامي) ويضيفها كمقالات جديدة بجدول <code>blogs</code> بتصنيف محدَّد مسبقاً، بصور محمَّلة ومُخزَّنة محلياً، مع قواعد استبدال نصي اختيارية لكل مصدر. <b>لا حاجة لأي تعديل بملفات القوالب</b> — المقالات المستوردة تظهر تلقائياً بأي قالب مثل أي مقال عادي (نفس جدول <code>blogs</code>، نفس الصفحات المشتركة).</p>
         <p>محرّك الاستيراد بملف منفصل <code>includes/feed_importer.php</code> (وليس <code>functions.php</code>) — يُضمَّن فقط حيث يُستخدَم فعلياً عبر <code>require_once 'includes/feed_importer.php';</code>. الدالة المحورية <b><code>runFeedImport($sourceId, $maxSources, $maxItemsPerSource)</code></b> تجلب/تحلّل/تستورد، مع تحقق تلقائي من التكرار عبر جدول <code>feed_imported_items</code>.</p>
-        <p class="mb-0">التشغيل التلقائي بلا أي إعداد يدوي عبر "نبضة" <code>fetch()</code> خفيفة يُطلقها <code>abma/footer.php</code> بكل زيارة للوحة التحكم، تضرب نقطة عامة محمية بتوكن <code>api/feeds-cron.php</code> (محدَّدة المعدل: مرة كل 5 دقائق كحد أقصى) — بالإضافة لخيار Cron حقيقي بالاستضافة (الرابط الجاهز مع التوكن معروض أعلى صفحة "سحب المقالات"). راجع CLAUDE.md (قسم "وحدة سحب المقالات") للتفاصيل الكاملة بما فيها قرارات الأمان (تنقية HTML المستورد عبر <code>purifyImportedHtml()</code>، التحقق الفعلي من نوع الصور المحمَّلة).</p>
+        <p class="mb-0">التشغيل التلقائي بلا أي إعداد يدوي عبر "نبضة" <code>fetch()</code> خفيفة يُطلقها <code>abma/footer.php</code> بكل زيارة للوحة التحكم، تضرب نقطة عامة محمية بتوكن <code>api/feeds-cron.php</code> (محدَّدة المعدل: مرة كل 5 دقائق كحد أقصى) — بالإضافة لخيار Cron حقيقي بالاستضافة (الرابط الجاهز مع التوكن معروض أعلى صفحة "سحب المقالات").</p>
     </div>
 </div>
 
@@ -899,7 +899,7 @@ require_once $__d . '/autoload.php';
             (<code>blog</code>, <code>service</code>, <code>portfolio</code>, <code>matches</code>,
             <code>page</code>, <code>contact</code>, <code>search</code>) لم تعد ثابتة —
             صاحب الموقع يستطيع تغييرها من <b>الإعدادات ▸ قسم "7. روابط المسارات القابلة
-            للتخصيص"</b>. أي رابط بأي ملف Twig (تصفّح، فوتر، breadcrumb، بطاقات، ترقيم صفحات،
+                للتخصيص"</b>. أي رابط بأي ملف Twig (تصفّح، فوتر، breadcrumb، بطاقات، ترقيم صفحات،
             <code>{% set og_url %}</code> لتبديل اللغة...) <b>يجب</b> أن يُبنى عبر متغيّر Twig
             العام الجديد <code>routes</code> بدل كتابة الكلمة حرفياً، وإلا سينكسر الرابط فور أن
             يغيّر صاحب الموقع الإعداد. هذا الشرط إلزامي لكل قالب مستقبلي أيضاً — وليس مثل بقية
@@ -970,12 +970,30 @@ require_once $__d . '/autoload.php';
         <h6 class="mt-4">أمثلة تحويل مباشرة (قبل ← بعد)</h6>
         <table class="table table-bordered table-sm">
             <tbody>
-                <tr><td><code>href="&#123;&#123; siteUrl &#125;&#125;blog"</code></td><td>← خطأ (ثابت)</td></tr>
-                <tr><td><code>href="&#123;&#123; siteUrl &#125;&#125;&#123;&#123; routes.blog &#125;&#125;"</code></td><td>✓ صحيح (ديناميكي)</td></tr>
-                <tr><td><code>&#123;% set og_url = "blog/" ~ blog.slug %&#125;</code></td><td>← خطأ</td></tr>
-                <tr><td><code>&#123;% set og_url = routes.blog ~ "/" ~ blog.slug %&#125;</code></td><td>✓ صحيح</td></tr>
-                <tr><td><code>href="blog?page=&#123;&#123; p &#125;&#125;"</code> (نسبي)</td><td>← خطأ (ينكسر أيضاً حتى بدون تخصيص، لأنه نسبي)</td></tr>
-                <tr><td><code>href="&#123;&#123; siteUrl &#125;&#125;&#123;&#123; routes.blog &#125;&#125;?page=&#123;&#123; p &#125;&#125;"</code></td><td>✓ صحيح (مطلق + ديناميكي)</td></tr>
+                <tr>
+                    <td><code>href="&#123;&#123; siteUrl &#125;&#125;blog"</code></td>
+                    <td>← خطأ (ثابت)</td>
+                </tr>
+                <tr>
+                    <td><code>href="&#123;&#123; siteUrl &#125;&#125;&#123;&#123; routes.blog &#125;&#125;"</code></td>
+                    <td>✓ صحيح (ديناميكي)</td>
+                </tr>
+                <tr>
+                    <td><code>&#123;% set og_url = "blog/" ~ blog.slug %&#125;</code></td>
+                    <td>← خطأ</td>
+                </tr>
+                <tr>
+                    <td><code>&#123;% set og_url = routes.blog ~ "/" ~ blog.slug %&#125;</code></td>
+                    <td>✓ صحيح</td>
+                </tr>
+                <tr>
+                    <td><code>href="blog?page=&#123;&#123; p &#125;&#125;"</code> (نسبي)</td>
+                    <td>← خطأ (ينكسر أيضاً حتى بدون تخصيص، لأنه نسبي)</td>
+                </tr>
+                <tr>
+                    <td><code>href="&#123;&#123; siteUrl &#125;&#125;&#123;&#123; routes.blog &#125;&#125;?page=&#123;&#123; p &#125;&#125;"</code></td>
+                    <td>✓ صحيح (مطلق + ديناميكي)</td>
+                </tr>
             </tbody>
         </table>
         <p class="mb-0"><b>ملاحظة لأي كود PHP جديد بالجذر</b> (وليس Twig فقط): استخدم الدالة
@@ -985,7 +1003,8 @@ require_once $__d . '/autoload.php';
             <code>service</code>, <code>portfolio</code>, <code>matches</code>, <code>page</code>,
             <code>contact</code>, <code>search</code>. الروابط الثابتة غير القابلة للتخصيص
             (<code>pricing</code>, <code>sitemap</code>, <code>robots</code>, <code>feed</code>/<code>rss</code>/<code>blogs.rss</code>,
-            <code>preview-*</code>) تبقى كما هي دون تغيير.</p>
+            <code>preview-*</code>) تبقى كما هي دون تغيير.
+        </p>
     </div>
 </div>
 
@@ -1053,25 +1072,49 @@ require_once $__d . '/autoload.php';
 <div class="card mb-4" id="hooks">
     <div class="card-body">
         <h5 class="card-title">13. نظام Hooks/Actions (للمطوّرين — وليس لمصممي القوالب فقط)</h5>
-        <p>هذا القسم موجَّه لمن يريد بناء <b>إضافة/تخصيص برمجي</b> للسكربت (وليس قالب Twig) — مثل ربط حدث خارجي، تعديل بيانات صفحة قبل عرضها، أو أي منطق إضافي — <b>دون تعديل أي ملف من ملفات النواة</b>. تعديل ملفات النواة مباشرة يعني فقدان تعديلك عند أي تحديث تلقائي مستقبلي للسكربت (راجع نظام التحديثات في CLAUDE.md) — بينما أي كود بمجلد <code>includes/addons/</code> محمي دائماً لأنه ليس جزءاً من مستودع السكربت الرسمي.</p>
+        <p>هذا القسم موجَّه لمن يريد بناء <b>إضافة/تخصيص برمجي</b> للسكربت (وليس قالب Twig) — مثل ربط حدث خارجي، تعديل بيانات صفحة قبل عرضها، أو أي منطق إضافي — <b>دون تعديل أي ملف من ملفات النواة</b>.</p>
         <div class="alert alert-info">
             ضع ملف PHP واحد أو أكثر داخل <code>includes/addons/</code> (يُنشأ تلقائياً، محمي بـ<code>.htaccess</code> من الوصول المباشر عبر الرابط) — يُحمَّل كل ملف بهذا المجلد تلقائياً مع كل طلب، قبل أي فرصة لتشغيل أي حدث لاحق.
         </div>
         <h6 class="mt-4">الدوال المتاحة</h6>
         <table class="table table-bordered table-sm">
             <tbody>
-                <tr><td><code>add_action($hook, $callback, $priority = 10)</code></td><td>سجّل دالة تُنفَّذ عند وقوع حدث معيَّن</td></tr>
-                <tr><td><code>do_action($hook, ...$args)</code></td><td>شغّل كل الدوال المسجَّلة لحدث (تُستدعى من كود النواة، وليس من إضافتك)</td></tr>
-                <tr><td><code>add_filter($hook, $callback, $priority = 10)</code></td><td>سجّل دالة تُعدِّل قيمة موجودة (تستقبل القيمة، تُعيد قيمة معدَّلة)</td></tr>
-                <tr><td><code>apply_filters($hook, $value, ...$args)</code></td><td>مرّر قيمة عبر كل الفلاتر المسجَّلة (يُستدعى من كود النواة)</td></tr>
+                <tr>
+                    <td><code>add_action($hook, $callback, $priority = 10)</code></td>
+                    <td>سجّل دالة تُنفَّذ عند وقوع حدث معيَّن</td>
+                </tr>
+                <tr>
+                    <td><code>do_action($hook, ...$args)</code></td>
+                    <td>شغّل كل الدوال المسجَّلة لحدث (تُستدعى من كود النواة، وليس من إضافتك)</td>
+                </tr>
+                <tr>
+                    <td><code>add_filter($hook, $callback, $priority = 10)</code></td>
+                    <td>سجّل دالة تُعدِّل قيمة موجودة (تستقبل القيمة، تُعيد قيمة معدَّلة)</td>
+                </tr>
+                <tr>
+                    <td><code>apply_filters($hook, $value, ...$args)</code></td>
+                    <td>مرّر قيمة عبر كل الفلاتر المسجَّلة (يُستدعى من كود النواة)</td>
+                </tr>
             </tbody>
         </table>
         <h6 class="mt-4">نقاط الامتداد المتوفرة حالياً</h6>
         <table class="table table-bordered table-sm">
             <tbody>
-                <tr><td><code>ojuba_admin_login</code></td><td>Action</td><td>بعد نجاح أي دخول للوحة التحكم — <code>do_action('ojuba_admin_login', $adminId, $email)</code></td></tr>
-                <tr><td><code>ojuba_blog_saved</code></td><td>Action</td><td>بعد إنشاء/تعديل مقال — <code>do_action('ojuba_blog_saved', $blogId, $isNew)</code></td></tr>
-                <tr><td><code>ojuba_render_vars</code></td><td>Filter</td><td>قبل عرض أي صفحة عامة عبر <code>safeRender()</code> مباشرة (يشمل الصفحة الرئيسية) — <code>apply_filters('ojuba_render_vars', $vars, $templateName)</code>، أقوى نقطة امتداد متاحة لأنها تتيح إضافة/تعديل أي متغيّر Twig لأي صفحة دون لمس أي ملف Twig أو PHP</td></tr>
+                <tr>
+                    <td><code>ojuba_admin_login</code></td>
+                    <td>Action</td>
+                    <td>بعد نجاح أي دخول للوحة التحكم — <code>do_action('ojuba_admin_login', $adminId, $email)</code></td>
+                </tr>
+                <tr>
+                    <td><code>ojuba_blog_saved</code></td>
+                    <td>Action</td>
+                    <td>بعد إنشاء/تعديل مقال — <code>do_action('ojuba_blog_saved', $blogId, $isNew)</code></td>
+                </tr>
+                <tr>
+                    <td><code>ojuba_render_vars</code></td>
+                    <td>Filter</td>
+                    <td>قبل عرض أي صفحة عامة عبر <code>safeRender()</code> مباشرة (يشمل الصفحة الرئيسية) — <code>apply_filters('ojuba_render_vars', $vars, $templateName)</code>، أقوى نقطة امتداد متاحة لأنها تتيح إضافة/تعديل أي متغيّر Twig لأي صفحة دون لمس أي ملف Twig أو PHP</td>
+                </tr>
             </tbody>
         </table>
         <h6 class="mt-4">مثال كامل — <code>includes/addons/my-addon.php</code></h6>
@@ -1096,12 +1139,30 @@ add_filter('ojuba_render_vars', function ($vars, $template) {
         <p>واجهة JSON عامة (بدون تسجيل دخول، قراءة فقط — لا يوجد أي endpoint كتابة) لأي واجهة أمامية منفصلة (headless frontend، تطبيق جوال، تكامل خارجي) تريد قراءة محتوى الموقع دون المرور عبر Twig.</p>
         <table class="table table-bordered table-sm">
             <tbody>
-                <tr><td><code>GET api/v1/site</code></td><td>معلومات الموقع + قائمة الوحدات المفعّلة</td></tr>
-                <tr><td><code>GET api/v1/blogs</code></td><td>قائمة مقالات (<code>?page=</code>, <code>?per_page=</code>, <code>?category=</code>)</td></tr>
-                <tr><td><code>GET api/v1/blogs?slug=xxx</code></td><td>مقال واحد</td></tr>
-                <tr><td><code>GET api/v1/pages</code> / <code>?slug=xxx</code></td><td>الصفحات الثابتة</td></tr>
-                <tr><td><code>GET api/v1/services</code> / <code>?slug=xxx</code></td><td>الخدمات</td></tr>
-                <tr><td><code>GET api/v1/portfolio</code> / <code>?id=N</code></td><td>الأعمال (بمعرّف رقمي وليس slug)</td></tr>
+                <tr>
+                    <td><code>GET api/v1/site</code></td>
+                    <td>معلومات الموقع + قائمة الوحدات المفعّلة</td>
+                </tr>
+                <tr>
+                    <td><code>GET api/v1/blogs</code></td>
+                    <td>قائمة مقالات (<code>?page=</code>, <code>?per_page=</code>, <code>?category=</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>GET api/v1/blogs?slug=xxx</code></td>
+                    <td>مقال واحد</td>
+                </tr>
+                <tr>
+                    <td><code>GET api/v1/pages</code> / <code>?slug=xxx</code></td>
+                    <td>الصفحات الثابتة</td>
+                </tr>
+                <tr>
+                    <td><code>GET api/v1/services</code> / <code>?slug=xxx</code></td>
+                    <td>الخدمات</td>
+                </tr>
+                <tr>
+                    <td><code>GET api/v1/portfolio</code> / <code>?id=N</code></td>
+                    <td>الأعمال (بمعرّف رقمي وليس slug)</td>
+                </tr>
             </tbody>
         </table>
         <p>كل نقطة تدعم <code>?lang=ar</code> أو <code>?lang=en</code> صريح لاختيار لغة المحتوى (مستقل عن كوكي الزائر)، وتُعيد 404 JSON تلقائياً إن كانت الوحدة المعنية معطَّلة (<code>moduleEnabled()</code>). الروابط المُعادة داخل كل عنصر تُبنى عبر <code>routeUrl()</code> فتحترم أي تخصيص لمسارات الموقع (قسم 10) تلقائياً.</p>

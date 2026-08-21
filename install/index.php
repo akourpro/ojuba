@@ -10,7 +10,7 @@ $installDir = __DIR__ . '/';
 $rootDir = dirname(__DIR__) . '/';
 $configPath = $rootDir . 'includes/config.php';
 
-// ===== حارس: رفض العمل إن كان السكربت مثبَّتاً بالفعل =====
+// ===== حماية: رفض العمل إن كان السكربت مثبَّتاً بالفعل =====
 if (is_file($configPath)) {
 	require_once $configPath;
 	try {
@@ -222,9 +222,7 @@ if ($step === 2 && isset($_POST['db_submit'])) {
 				. "ini_set('display_errors', 1);\n"
 				. "ini_set('display_startup_errors', 1);\n"
 				. "ini_set('log_errors', 1);\n"
-				. "// استبعاد E_DEPRECATED/E_STRICT عمداً: مكتبة Twig المرفقة تُصدر تحذيرات\n"
-				. "// \"Deprecated\" كثيرة على PHP 8.4+ لا علاقة لها بكود أُعجوبة نفسه.\n"
-				. "error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);\n\n"
+				. "error_reporting(E_ALL & ~E_DEPRECATED);\n\n"
 				. "/**\n * DB CONFIG\n */\n"
 				. "define(\"HOST\", " . var_export($dbFormValues['host'], true) . ");\n"
 				. "define(\"USER\", " . var_export($dbFormValues['user'], true) . ");\n"
@@ -368,33 +366,34 @@ if ($step === 4) {
 					'site_folder' => $siteFolder,
 					'theme' => 'default',
 					'logo' => 'logo.png',
-					'whatsapp_number' => '',
-					'logo_color' => '',
-					'location_en' => '',
-					'facebook' => '',
-					'instagram' => '',
-					'snapchat' => '',
-					'discord' => '',
-					'twitter' => '',
-					'github' => '',
-					'linkedin' => '',
-					'youtube' => '',
-					'site_mail' => '',
-					'site_phone' => '',
-					'maps' => '',
-					'pdf' => '',
+					'whatsapp_number' => null,
+					'logo_color' => null,
+					'location' => null,
+					'location_en' => null,
+					'facebook' => null,
+					'instagram' => null,
+					'snapchat' => null,
+					'discord' => null,
+					'twitter' => null,
+					'github' => null,
+					'linkedin' => null,
+					'youtube' => null,
+					'site_mail' => null,
+					'site_phone' => null,
+					'maps' => null,
+					'pdf' => null,
 					'indexnow' => '5e0b22602ab74773bbb99d19d0dbc4ab',
 					// SMTP
-					'smtp_host' => '',
-					'smtp_user' => '',
-					'smtp_pass' => '',
+					'smtp_host' => null,
+					'smtp_user' => null,
+					'smtp_pass' => null,
 					// Telegram
-					'tg_token' => '',
-					'tg_id' => '',
-					'tg_status' => '',
+					'tg_token' => null,
+					'tg_id' => null,
+					'tg_status' => null,
 					// Whatsapp
-					'wa_appkey' => '',
-					'wa_authkey' => '',
+					'wa_appkey' => null,
+					'wa_authkey' => null,
 					'language_mode' => $submitted['language_mode'],
 					'business_type' => $submitted['business_type'],
 				];
