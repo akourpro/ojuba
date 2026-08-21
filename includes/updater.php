@@ -19,15 +19,20 @@
  * القالب جزء من المستودع نفسه — هذا سلوك متوقّع ويجب توضيحه للمستخدم بواجهة
  * صفحة التحديثات قبل أي تطبيق.
  *
- * .htaccess/.user.ini/js/functions.js **ليست** مستثناة من النسخ (تُستبدَل
- * بالنسخة الخام من GitHub في كل تحديث، لتصل أي قواعد Rewrite/حماية جديدة
- * فعلاً لكل المواقع المثبَّتة) — لكن مباشرة بعد النسخ تُستدعى
- * updaterReapplySiteEnvironmentPaths() لإعادة كتابة القيم الخاصة بهذا الموقع
- * تحديداً (المسار الحقيقي على القرص، مجلد الموقع الفرعي) فوق النسخة الخام،
- * تماماً كما تُعاد كتابة كتلة روابط المسارات المخصَّصة عبر
+ * .htaccess/.user.ini/js/functions.js/abma/.htaccess/abma/.user.ini **ليست**
+ * مستثناة من النسخ (تُستبدَل بالنسخة الخام من GitHub في كل تحديث، لتصل أي
+ * قواعد Rewrite/حماية جديدة فعلاً لكل المواقع المثبَّتة) — لكن مباشرة بعد
+ * النسخ تُستدعى updaterReapplySiteEnvironmentPaths() لإعادة كتابة القيم
+ * الخاصة بهذا الموقع تحديداً (المسار الحقيقي على القرص، مجلد الموقع الفرعي)
+ * فوق النسخة الخام، تماماً كما تُعاد كتابة كتلة روابط المسارات المخصَّصة عبر
  * regenerateRouteHtaccess() بعدها مباشرة. **بدون هذه الخطوة يُعيد كل تحديث
- * سكربت ضبط `php_value include_path` على مسار بيئة تطوير السكربت نفسه بدل
- * مسار الاستضافة الفعلي — خطأ حقيقي اكتُشِف بواسطة مستخدم بعد أول تحديث حي.**
+ * سكربت ضبط `php_value include_path`/`auto_prepend_file` على مسار بيئة
+ * تطوير السكربت نفسه بدل مسار الاستضافة الفعلي — خطأ حقيقي اكتُشِف بواسطة
+ * مستخدم بعد أول تحديثين حيّين متتاليين (المرة الأولى: include_path بالجذر؛
+ * المرة الثانية: auto_prepend_file النسبي بـabma/.htaccess تحديداً، الذي سبّب
+ * "Failed opening required 'abma/autoload.php'" لأن تحليل PHP لمسار نسبي بهذا
+ * التوجيه يختلف فعلياً بين مختلف بيئات SAPI — لذا كل هذه المسارات أصبحت
+ * مطلقة دائماً، لا نسبية إطلاقاً).**
  */
 
 const UPDATER_REPO = 'akourpro/ojuba';
@@ -402,12 +407,15 @@ function updaterReapplySiteEnvironmentPaths($rootDir)
 	$real = realpath($rootDir);
 	$realPath = rtrim(str_replace('\\', '/', $real !== false ? $real : $rootDir), '/') . '/';
 
-	// .htaccess: أسطر php_value include_path (مكرَّرة 3 مرات داخل كتل
-	// <IfModule mod_php.c>/mod_php7.c/mod_php8.c>) + أسطر ErrorDocument الأربعة
+	// .htaccess: أسطر php_value include_path/auto_prepend_file (مكرَّرة 3 مرات
+	// داخل كتل <IfModule mod_php.c>/mod_php7.c/mod_php8.c>) + أسطر ErrorDocument
+	// الأربعة. auto_prepend_file مسار مطلق دائماً (وليس "autoload.php" النسبي)
+	// — راجع تعليق كتلة abma/.htaccess أسفل هذه الدالة لسبب هذا التحوّل.
 	$htaccessPath = $rootDir . '.htaccess';
 	$htaccessContent = @file_get_contents($htaccessPath);
 	if ($htaccessContent !== false) {
 		$htaccessContent = preg_replace('/^\s*php_value include_path ".*"$/m', '    php_value include_path "' . $realPath . '"', $htaccessContent);
+		$htaccessContent = preg_replace('/^\s*php_value auto_prepend_file .*$/m', '    php_value auto_prepend_file "' . $realPath . 'autoload.php"', $htaccessContent);
 		$htaccessContent = preg_replace('/^ErrorDocument 404 .*$/m', 'ErrorDocument 404 ' . $prefix . '/errors/404.php', $htaccessContent, 1);
 		$htaccessContent = preg_replace('/^ErrorDocument 500 .*$/m', 'ErrorDocument 500 ' . $prefix . '/errors/500.php', $htaccessContent, 1);
 		$htaccessContent = preg_replace('/^ErrorDocument 401 .*$/m', 'ErrorDocument 401 ' . $prefix . '/errors/401.php', $htaccessContent, 1);
@@ -415,12 +423,14 @@ function updaterReapplySiteEnvironmentPaths($rootDir)
 		@file_put_contents($htaccessPath, $htaccessContent);
 	}
 
-	// .user.ini: open_basedir + include_path (النظير المتوافق مع استضافات PHP-FPM/CGI)
+	// .user.ini: open_basedir + include_path + auto_prepend_file (النظير
+	// المتوافق مع استضافات PHP-FPM/CGI/LiteSpeed)
 	$iniPath = $rootDir . '.user.ini';
 	$iniContent = @file_get_contents($iniPath);
 	if ($iniContent !== false) {
 		$iniContent = preg_replace('/^open_basedir=.*$/m', 'open_basedir=' . $realPath . ':/tmp/', $iniContent, 1);
 		$iniContent = preg_replace('/^include_path=".*"$/m', 'include_path="' . $realPath . '"', $iniContent, 1);
+		$iniContent = preg_replace('/^auto_prepend_file=.*$/m', 'auto_prepend_file=' . $realPath . 'autoload.php', $iniContent, 1);
 		@file_put_contents($iniPath, $iniContent);
 	}
 
@@ -432,6 +442,29 @@ function updaterReapplySiteEnvironmentPaths($rootDir)
 	if ($jsContent !== false) {
 		$jsContent = str_replace('"/cms/includes/lang/"', '"' . $prefix . '/includes/lang/"', $jsContent);
 		@file_put_contents($jsPath, $jsContent);
+	}
+
+	// abma/.htaccess + abma/.user.ini: سلسلة auto_prepend_file/auto_append_file
+	// منفصلة تماماً عن الجذر (abma/autoload.php + abma/footer.php) — بلاغ
+	// مستخدم حقيقي بعد أول تحديث حي على استضافة PHP-FPM/LiteSpeed: القيمة
+	// النسبية "abma/autoload.php" فشلت بخطأ "Failed opening required" لأن
+	// تحليل PHP للمسار النسبي بهذا التوجيه يختلف فعلياً بين mod_php وإعدادات
+	// FastCGI/LiteSpeed المختلفة (بعضها يحلّه بالنسبة لمجلد السكربت المُنفَّذ
+	// نفسه، لا مجلد .htaccess) — الحل الدائم مسار مطلق دائماً، بلا أي لبس.
+	$abmaHtaccessPath = $rootDir . 'abma/.htaccess';
+	$abmaHtaccessContent = @file_get_contents($abmaHtaccessPath);
+	if ($abmaHtaccessContent !== false) {
+		$abmaHtaccessContent = preg_replace('/^\s*php_value auto_prepend_file .*$/m', '    php_value auto_prepend_file "' . $realPath . 'abma/autoload.php"', $abmaHtaccessContent);
+		$abmaHtaccessContent = preg_replace('/^\s*php_value auto_append_file .*$/m', '    php_value auto_append_file "' . $realPath . 'abma/footer.php"', $abmaHtaccessContent);
+		@file_put_contents($abmaHtaccessPath, $abmaHtaccessContent);
+	}
+
+	$abmaIniPath = $rootDir . 'abma/.user.ini';
+	$abmaIniContent = @file_get_contents($abmaIniPath);
+	if ($abmaIniContent !== false) {
+		$abmaIniContent = preg_replace('/^auto_prepend_file=.*$/m', 'auto_prepend_file=' . $realPath . 'abma/autoload.php', $abmaIniContent, 1);
+		$abmaIniContent = preg_replace('/^auto_append_file=.*$/m', 'auto_append_file=' . $realPath . 'abma/footer.php', $abmaIniContent, 1);
+		@file_put_contents($abmaIniPath, $abmaIniContent);
 	}
 
 	return true;

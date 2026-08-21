@@ -86,17 +86,58 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 	$realPath = rtrim(str_replace('\\', '/', $real !== false ? $real : $rootDir), '/') . '/';
 	$prefix = $siteFolder !== '' ? '/' . trim($siteFolder, '/') : '';
 
-	// أسطر php_value include_path مكرَّرة 3 مرات (داخل <IfModule mod_php.c>/mod_php7.c/
-	// mod_php8.c> — راجع تعليق أعلى هذه الكتلة بـ.htaccess نفسه لسبب التكرار)، وكل
-	// سطر مسبوق بمسافات بادئة (indentation) داخل الكتلة، لذا بدون حد أقصى للاستبدال
-	// (لا `, 1`) ومع السماح بمسافات بادئة اختيارية بالنمط.
+	// أسطر php_value include_path/auto_prepend_file مكرَّرة 3 مرات (داخل
+	// <IfModule mod_php.c>/mod_php7.c/mod_php8.c> — راجع تعليق أعلى هذه الكتلة
+	// بـ.htaccess نفسه لسبب التكرار)، وكل سطر مسبوق بمسافات بادئة (indentation)
+	// داخل الكتلة، لذا بدون حد أقصى للاستبدال (لا `, 1`) ومع السماح بمسافات
+	// بادئة اختيارية بالنمط. auto_prepend_file أصبح مساراً مطلقاً (وليس
+	// "autoload.php" النسبي) لأن تحليل PHP لمسار نسبي بهذا التوجيه يختلف فعلياً
+	// بين mod_php وإعدادات FastCGI/LiteSpeed المختلفة — راجع نفس المشكلة
+	// بـabma/.htaccess (installerUpdateAbmaEnvironmentFiles() أدناه) لتفاصيل
+	// أوسع اكتُشِفت بواسطة مستخدم حقيقي.
 	$content = preg_replace('/^\s*php_value include_path ".*"$/m', '    php_value include_path "' . $realPath . '"', $content);
+	$content = preg_replace('/^\s*php_value auto_prepend_file .*$/m', '    php_value auto_prepend_file "' . $realPath . 'autoload.php"', $content);
 	$content = preg_replace('/^ErrorDocument 404 .*$/m', 'ErrorDocument 404 ' . $prefix . '/errors/404.php', $content, 1);
 	$content = preg_replace('/^ErrorDocument 500 .*$/m', 'ErrorDocument 500 ' . $prefix . '/errors/500.php', $content, 1);
 	$content = preg_replace('/^ErrorDocument 401 .*$/m', 'ErrorDocument 401 ' . $prefix . '/errors/401.php', $content, 1);
 	$content = preg_replace('/^ErrorDocument 403 .*$/m', 'ErrorDocument 403 ' . $prefix . '/errors/404.php', $content, 1);
 
 	return @file_put_contents($htaccessPath, $content) !== false;
+}
+
+/**
+ * نظير installerUpdateHtaccess()/installerUpdateUserIni() لكن لملفات لوحة
+ * التحكم الخاصة بها (abma/.htaccess + abma/.user.ini) — تحمل سلسلة
+ * auto_prepend_file/auto_append_file منفصلة تماماً عن الجذر
+ * (abma/autoload.php + abma/footer.php)، ونفس مشكلة توافق المسار النسبي
+ * الموثَّقة أعلاه تنطبق هنا أيضاً (بل هي مصدر الخطأ الفعلي المُكتشَف: مستخدم
+ * واجه "Failed opening required 'abma/autoload.php'" على استضافة حقيقية لأن
+ * القيمة كانت نسبية). كلا الملفين يجب أن يحملا مساراً مطلقاً دائماً.
+ */
+function installerUpdateAbmaEnvironmentFiles($rootDir)
+{
+	$real = realpath($rootDir);
+	$realPath = rtrim(str_replace('\\', '/', $real !== false ? $real : $rootDir), '/') . '/';
+
+	$htaccessPath = $rootDir . 'abma/.htaccess';
+	$htContent = @file_get_contents($htaccessPath);
+	$htOk = false;
+	if ($htContent !== false) {
+		$htContent = preg_replace('/^\s*php_value auto_prepend_file .*$/m', '    php_value auto_prepend_file "' . $realPath . 'abma/autoload.php"', $htContent);
+		$htContent = preg_replace('/^\s*php_value auto_append_file .*$/m', '    php_value auto_append_file "' . $realPath . 'abma/footer.php"', $htContent);
+		$htOk = @file_put_contents($htaccessPath, $htContent) !== false;
+	}
+
+	$iniPath = $rootDir . 'abma/.user.ini';
+	$iniContent = @file_get_contents($iniPath);
+	$iniOk = false;
+	if ($iniContent !== false) {
+		$iniContent = preg_replace('/^auto_prepend_file=.*$/m', 'auto_prepend_file=' . $realPath . 'abma/autoload.php', $iniContent, 1);
+		$iniContent = preg_replace('/^auto_append_file=.*$/m', 'auto_append_file=' . $realPath . 'abma/footer.php', $iniContent, 1);
+		$iniOk = @file_put_contents($iniPath, $iniContent) !== false;
+	}
+
+	return $htOk || $iniOk;
 }
 
 function installerUpdateFunctionsJs($rootDir, $siteFolder)
@@ -127,6 +168,7 @@ function installerUpdateUserIni($rootDir)
 
 	$content = preg_replace('/^open_basedir=.*$/m', 'open_basedir=' . $realPath . ':/tmp/', $content, 1);
 	$content = preg_replace('/^include_path=".*"$/m', 'include_path="' . $realPath . '"', $content, 1);
+	$content = preg_replace('/^auto_prepend_file=.*$/m', 'auto_prepend_file=' . $realPath . 'autoload.php', $content, 1);
 
 	return @file_put_contents($iniPath, $content) !== false;
 }
@@ -265,6 +307,7 @@ if ($step === 3 && isset($_POST['site_submit'])) {
 		installerUpdateHtaccess($rootDir, $siteFolder);
 		installerUpdateFunctionsJs($rootDir, $siteFolder);
 		installerUpdateUserIni($rootDir);
+		installerUpdateAbmaEnvironmentFiles($rootDir);
 
 		$_SESSION['install_site_info'] = $siteInfoValues;
 		$_SESSION['install_site_folder'] = $siteFolder;

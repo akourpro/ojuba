@@ -1,6 +1,16 @@
 # auto include
-php_value auto_prepend_file abma/autoload.php
-php_value auto_append_file abma/footer.php
+<IfModule mod_php.c>
+    php_value auto_prepend_file "/Applications/XAMPP/htdocs/ojuba/abma/autoload.php"
+    php_value auto_append_file "/Applications/XAMPP/htdocs/ojuba/abma/footer.php"
+</IfModule>
+<IfModule mod_php7.c>
+    php_value auto_prepend_file "/Applications/XAMPP/htdocs/ojuba/abma/autoload.php"
+    php_value auto_append_file "/Applications/XAMPP/htdocs/ojuba/abma/footer.php"
+</IfModule>
+<IfModule mod_php8.c>
+    php_value auto_prepend_file "/Applications/XAMPP/htdocs/ojuba/abma/autoload.php"
+    php_value auto_append_file "/Applications/XAMPP/htdocs/ojuba/abma/footer.php"
+</IfModule>
 
 # رفع ملفات zip لاستيراد القوالب (حتى 20 ميجا) يحتاج حدوداً أعلى من الافتراضي الشائع
 <IfModule mod_php.c>

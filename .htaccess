@@ -9,17 +9,17 @@ CheckSpelling off
 # auto include
 <IfModule mod_php.c>
     php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
-    php_value auto_prepend_file autoload.php
+    php_value auto_prepend_file "/Applications/XAMPP/htdocs/ojuba/autoload.php"
     php_value auto_append_file none
 </IfModule>
 <IfModule mod_php7.c>
     php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
-    php_value auto_prepend_file autoload.php
+    php_value auto_prepend_file "/Applications/XAMPP/htdocs/ojuba/autoload.php"
     php_value auto_append_file none
 </IfModule>
 <IfModule mod_php8.c>
     php_value include_path "/Applications/XAMPP/htdocs/ojuba/"
-    php_value auto_prepend_file autoload.php
+    php_value auto_prepend_file "/Applications/XAMPP/htdocs/ojuba/autoload.php"
     php_value auto_append_file none
 </IfModule>
 
