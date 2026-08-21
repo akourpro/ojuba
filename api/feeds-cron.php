@@ -15,8 +15,8 @@
  * الخارجية بطلبات متكررة، ومن استهلاك موارد الاستضافة عند سوء إعداد Cron
  * (فترة أقصر من اللازم) أو تكرار "النبضة" التلقائية على كل تحميل صفحة إدارية.
  */
-include_once 'includes/config.php';
-include_once 'includes/functions.php';
+include_once dirname(__DIR__) . '/includes/config.php';
+include_once dirname(__DIR__) . '/includes/functions.php';
 require_once 'includes/feed_importer.php';
 
 header('Content-Type: application/json; charset=utf-8');

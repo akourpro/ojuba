@@ -4,9 +4,12 @@
  * AUTO LOAD WITHOUT HEADER
  */
 
-include_once 'includes/config.php';
+$__ojubaRoot = dirname(__DIR__);
+set_include_path($__ojubaRoot . PATH_SEPARATOR . get_include_path());
 
-include_once 'includes/functions.php';
+require_once $__ojubaRoot . '/includes/config.php';
 
-include_once 'includes/csrf.php';
+require_once $__ojubaRoot . '/includes/functions.php';
+
+include_once $__ojubaRoot . '/includes/csrf.php';
 $csrf = new CSRF_Protect("_csrf", "OJUBA-abma");

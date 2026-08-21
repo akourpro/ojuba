@@ -4,9 +4,12 @@
  * AUTO LOAD WITH HEADER
  */
 
-include_once 'includes/config.php';
+$__ojubaRoot = dirname(__DIR__);
+set_include_path($__ojubaRoot . PATH_SEPARATOR . get_include_path());
 
-include_once 'includes/functions.php';
+require_once $__ojubaRoot . '/includes/config.php';
+
+require_once $__ojubaRoot . '/includes/functions.php';
 
 // login
 sec_session_start("OJUBA-abma");
@@ -15,7 +18,11 @@ if (!login_check_admin()) {
     exit;
 }
 
-include_once 'includes/csrf.php';
+require_once $__ojubaRoot . '/includes/csrf.php';
 $csrf = new CSRF_Protect("_csrf", "OJUBA-abma");
 
-include_once 'abma/header.php';
+register_shutdown_function(function () use ($__ojubaRoot) {
+    require $__ojubaRoot . '/abma/footer.php';
+});
+
+require_once $__ojubaRoot . '/abma/header.php';

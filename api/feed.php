@@ -1,4 +1,10 @@
 <?php
+// بوتستراب صريح (كان يعتمد على auto_prepend_file عبر api/.htaccess/api/.user.ini
+// فقط — بعض الاستضافات لا تُطبِّق أياً منهما، راجع تعليق autoload.php بجذر
+// الموقع لتفاصيل كاملة).
+include_once dirname(__DIR__) . '/includes/config.php';
+include_once dirname(__DIR__) . '/includes/functions.php';
+
 // إعداد الهيدر لتحديد نوع المحتوى XML
 header("Content-Type: application/rss+xml; charset=UTF-8");
 

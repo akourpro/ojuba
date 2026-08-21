@@ -11,8 +11,8 @@
  * إضافية (CSRF/rate-limit) أبعد من كونها READ-ONLY ولا تُعدّل أي شيء بقاعدة
  * البيانات.
  */
-include_once 'includes/config.php';
-include_once 'includes/functions.php';
+include_once dirname(__DIR__) . '/includes/config.php';
+include_once dirname(__DIR__) . '/includes/functions.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

@@ -10,8 +10,8 @@
  * يوجد خطر إغراق طرف ثالث بطلبات، فقط استهلاك حصة GitHub API الخاصة بهذا
  * الموقع نفسه — وهي محمية أصلاً بحد المعدل الداخلي بـupdaterCheckForUpdate()).
  */
-include_once 'includes/config.php';
-include_once 'includes/functions.php';
+include_once dirname(__DIR__) . '/includes/config.php';
+include_once dirname(__DIR__) . '/includes/functions.php';
 require_once 'includes/updater.php';
 
 header('Content-Type: application/json; charset=utf-8');

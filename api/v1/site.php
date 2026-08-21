@@ -14,8 +14,8 @@
  * config.php وfunctions.php فقط، بدون autoload.php/twigload.php الكاملين —
  * هذه الواجهة JSON فقط ولا تحتاج Twig.
  */
-include_once 'includes/config.php';
-include_once 'includes/functions.php';
+include_once dirname(__DIR__, 2) . '/includes/config.php';
+include_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');

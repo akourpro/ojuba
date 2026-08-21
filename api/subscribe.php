@@ -16,8 +16,8 @@
  * تفعيل/تعطيل الميزة بالكامل: من "لوحة التحكم > الإضافات" (زر "مراسلة البريد") —
  * موجود مسبقاً ويتحكم بنفس moduleEnabled('mailing') المستخدمة هنا.
  */
-include_once 'includes/config.php';
-include_once 'includes/functions.php';
+include_once dirname(__DIR__) . '/includes/config.php';
+include_once dirname(__DIR__) . '/includes/functions.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

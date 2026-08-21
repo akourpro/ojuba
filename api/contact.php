@@ -1,7 +1,7 @@
 <?php
 // DB CONFIG & FUNCTIONS
-include_once 'includes/config.php';
-include_once 'includes/functions.php';
+include_once dirname(__DIR__) . '/includes/config.php';
+include_once dirname(__DIR__) . '/includes/functions.php';
 
 // POST DATA
 $request_body = file_get_contents('php://input');

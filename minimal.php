@@ -11,7 +11,7 @@ include_once 'includes/functions.php';
 // include_once 'sec.php';
 
 include_once 'includes/csrf.php';
-$csrf = new CSRF_Protect('_csrf', "LABYEEK-auth");
+$csrf = new CSRF_Protect('_csrf', "Ojuba-auth");
 // Load the Twig functions
 require_once 'twigload.php';
 
