@@ -4,28 +4,23 @@
  * AUTO LOAD WITH HEADER
  */
 
-// نقطة الانطلاق الوحيدة الموثوقة لكل include/require نسبي لاحق بالمشروع
-// بأكمله (مثل include_once 'includes/functions.php' أو 'abma/header.php' —
-// عشرات المواضع بالكود تفترض أن جذر الموقع مُدرَج على include_path). هذه
-// كانت مهمة php_value include_path (.htaccess) أو .user.ini سابقاً، لكن
-// اكتُشِف أن بعض بيئات الاستضافة (LiteSpeed عبر DirectAdmin/CloudLinux
-// تحديداً) لا تُطبِّق أياً من الآليتين إطلاقاً مهما كان محتواهما صحيحاً —
-// فيفشل أي include نسبي بالمشروع بالكامل. الحل الدائم المستقل عن أي إعداد
-// سيرفر: ضبط include_path برمجياً هنا بدالة PHP قياسية (set_include_path)
-// تعمل دائماً بغض النظر عن السيرفر/SAPI المُستخدَم.
 set_include_path(__DIR__ . PATH_SEPARATOR . get_include_path());
+
+if (!is_file(__DIR__ . '/includes/config.php')) {
+	$__docRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+	$__siteRoot = rtrim(str_replace('\\', '/', __DIR__), '/');
+	$__basePath = '';
+	if ($__docRoot !== '' && strpos($__siteRoot, $__docRoot) === 0) {
+		$__basePath = substr($__siteRoot, strlen($__docRoot));
+	}
+	header('Location: ' . $__basePath . '/install/');
+	exit;
+}
 
 require_once __DIR__ . '/includes/config.php';
 
 require_once __DIR__ . '/includes/functions.php';
 
-// وضع "الصيانة" أثناء تحديث السكربت: ملف علامة .maintenance بجذر الموقع
-// (يُنشئه/يُزيله updaterApplyUpdate() تلقائياً بـ includes/updater.php أثناء
-// نسخ ملفات الإصدار الجديد فعلياً). يخص الموقع العام فقط — لوحة التحكم
-// (abma/*) تستخدم سلسلة auto_prepend_file منفصلة تماماً (abma/autoload.php)
-// فتبقى تعمل دائماً حتى يتابع صاحب الموقع تقدّم التحديث. نقاط api/*.php
-// العامة مستثناة أيضاً (JSON، ليست صفحات زوار، وبعضها جزء من آلية التحديث
-// نفسها مثل api/update-check.php) — لا تلمس هذا الاستثناء بأي كود مستقبلي.
 $maintenanceFlag = getpath() . '.maintenance';
 $isApiRequest = strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false;
 if (is_file($maintenanceFlag) && !$isApiRequest) {
@@ -40,8 +35,6 @@ if (is_file($maintenanceFlag) && !$isApiRequest) {
 	exit;
 }
 
-// وضع معاينة القوالب: يبدّل $site['theme'] مؤقتاً (owner فقط) قبل تحميل Twig
-// إن كانت المعاينة مفعّلة بجلسة لوحة التحكم — انظر previewModeInit() بـ functions.php
 previewModeInit();
 
 require_once __DIR__ . '/includes/csrf.php';
