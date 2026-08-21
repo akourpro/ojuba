@@ -433,6 +433,13 @@ if ($step === 5 && isset($_POST['owner_submit'])) {
 		header('Location: ?step=2');
 		exit;
 	}
+	// functions.php يحمّل ملفات فرعية أخرى بمسارات نسبية خام (includes/hooks.php،
+	// includes/libs/HTMLPurifier/...، includes/lang/{lang}.php...) تعتمد أصلاً على
+	// أن autoload.php/abma/autoload.php يضبطان include_path مسبقاً — لكن install/
+	// مستقل تماماً عن تلك السلسلة، فيجب ضبطه هنا يدوياً بنفس الطريقة قبل تحميل
+	// functions.php مباشرة، وإلا تفشل هذه التحميلات الفرعية على أي استضافة لا
+	// تُرجع "." (مجلد السكربت الحالي) ضمن include_path الافتراضي.
+	set_include_path($rootDir . PATH_SEPARATOR . get_include_path());
 	require_once $rootDir . 'includes/functions.php';
 
 	$username = trim($_POST['owner_username'] ?? '');
