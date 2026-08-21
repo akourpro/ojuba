@@ -1,3 +1,6 @@
-# auto include
-php_value auto_prepend_file abma/minimal.php
+# auto include — تم إلغاؤه عمداً: كل ملف بهذا المجلد يحمل الآن بوتستراب صريح
+# (require_once لـ abma/minimal.php) بأول سطر بالكود نفسه، لأن auto_prepend_file
+# لا يعمل إطلاقاً على بعض الاستضافات (راجع تعليق abma/minimal.php وCLAUDE.md).
+# ترك هذا التوجيه فعّالاً بمسار نسبي كان يسبب أخطاء 500 قاتلة على تلك الاستضافات.
+php_value auto_prepend_file none
 php_value auto_append_file none

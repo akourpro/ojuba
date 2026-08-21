@@ -1,3 +1,6 @@
-# auto include
-php_value auto_prepend_file includes/minimal.php
+# auto include — تم إلغاؤه عمداً: arjs.php/enjs.php يحملان الآن بوتستراب صريح
+# بأول سطر بالكود نفسه، لأن auto_prepend_file لا يعمل إطلاقاً على بعض
+# الاستضافات (راجع CLAUDE.md). ترك هذا التوجيه فعّالاً بمسار نسبي كان يسبب
+# أخطاء 500 قاتلة على تلك الاستضافات.
+php_value auto_prepend_file none
 php_value auto_append_file none

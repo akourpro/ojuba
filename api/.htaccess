@@ -1,3 +1,6 @@
-# auto include
-php_value auto_prepend_file minimal.php
+# auto include — تم إلغاؤه عمداً: هذا التوجيه كان يشير أصلاً لملف api/minimal.php
+# غير الموجود إطلاقاً (كود قديم لم يُستخدَم فعلياً)، وكل ملف تحت api/ يحمل الآن
+# بوتستراب صريح (include_once لـ includes/config.php و functions.php) بأول
+# سطر بالكود نفسه — راجع CLAUDE.md لتفاصيل كاملة.
+php_value auto_prepend_file none
 php_value auto_append_file none

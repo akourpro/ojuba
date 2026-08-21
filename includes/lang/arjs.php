@@ -1,5 +1,8 @@
 <?php
+// بوتستراب صريح بدل الاعتماد على auto_prepend_file (بعض الاستضافات لا تدعمه
+// إطلاقاً — راجع تعليق abma/minimal.php وCLAUDE.md لتفاصيل كاملة).
+require_once dirname(__DIR__) . '/minimal.php';
 
-include_once 'includes/lang/ar.php';
+require_once __DIR__ . '/ar.php';
 
 echo json_encode($lang);
