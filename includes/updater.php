@@ -444,18 +444,23 @@ function updaterReapplySiteEnvironmentPaths($rootDir)
 		@file_put_contents($jsPath, $jsContent);
 	}
 
-	// abma/.htaccess + abma/.user.ini: سلسلة auto_prepend_file/auto_append_file
-	// منفصلة تماماً عن الجذر (abma/autoload.php + abma/footer.php) — بلاغ
-	// مستخدم حقيقي بعد أول تحديث حي على استضافة PHP-FPM/LiteSpeed: القيمة
-	// النسبية "abma/autoload.php" فشلت بخطأ "Failed opening required" لأن
-	// تحليل PHP للمسار النسبي بهذا التوجيه يختلف فعلياً بين mod_php وإعدادات
-	// FastCGI/LiteSpeed المختلفة (بعضها يحلّه بالنسبة لمجلد السكربت المُنفَّذ
-	// نفسه، لا مجلد .htaccess) — الحل الدائم مسار مطلق دائماً، بلا أي لبس.
+	// abma/.htaccess + abma/.user.ini: سلسلة auto_prepend_file منفصلة تماماً عن
+	// الجذر (abma/autoload.php) — بلاغ مستخدم حقيقي بعد أول تحديث حي على
+	// استضافة PHP-FPM/LiteSpeed: القيمة النسبية "abma/autoload.php" فشلت بخطأ
+	// "Failed opening required" لأن تحليل PHP للمسار النسبي بهذا التوجيه يختلف
+	// فعلياً بين mod_php وإعدادات FastCGI/LiteSpeed المختلفة (بعضها يحلّه
+	// بالنسبة لمجلد السكربت المُنفَّذ نفسه، لا مجلد .htaccess) — الحل الدائم
+	// مسار مطلق دائماً، بلا أي لبس. auto_append_file يبقى ثابتاً على "none"
+	// عمداً (وليس مساراً مطلقاً لـ abma/footer.php كما كان سابقاً):
+	// abma/autoload.php يُحمِّل footer.php بنفسه عبر register_shutdown_function()
+	// — إبقاء auto_append_file يشير له أيضاً على أي استضافة تُطبِّق هذا
+	// التوجيه فعلياً يُنتج فوتر مكرَّراً مرتين بلوحة التحكم (بلاغ مستخدم حقيقي
+	// آخر). راجع CLAUDE.md لتفاصيل كاملة.
 	$abmaHtaccessPath = $rootDir . 'abma/.htaccess';
 	$abmaHtaccessContent = @file_get_contents($abmaHtaccessPath);
 	if ($abmaHtaccessContent !== false) {
 		$abmaHtaccessContent = preg_replace('/^\s*php_value auto_prepend_file .*$/m', '    php_value auto_prepend_file "' . $realPath . 'abma/autoload.php"', $abmaHtaccessContent);
-		$abmaHtaccessContent = preg_replace('/^\s*php_value auto_append_file .*$/m', '    php_value auto_append_file "' . $realPath . 'abma/footer.php"', $abmaHtaccessContent);
+		$abmaHtaccessContent = preg_replace('/^\s*php_value auto_append_file .*$/m', '    php_value auto_append_file none', $abmaHtaccessContent);
 		@file_put_contents($abmaHtaccessPath, $abmaHtaccessContent);
 	}
 
@@ -463,7 +468,7 @@ function updaterReapplySiteEnvironmentPaths($rootDir)
 	$abmaIniContent = @file_get_contents($abmaIniPath);
 	if ($abmaIniContent !== false) {
 		$abmaIniContent = preg_replace('/^auto_prepend_file=.*$/m', 'auto_prepend_file=' . $realPath . 'abma/autoload.php', $abmaIniContent, 1);
-		$abmaIniContent = preg_replace('/^auto_append_file=.*$/m', 'auto_append_file=' . $realPath . 'abma/footer.php', $abmaIniContent, 1);
+		$abmaIniContent = preg_replace('/^auto_append_file=.*$/m', 'auto_append_file=none', $abmaIniContent, 1);
 		@file_put_contents($abmaIniPath, $abmaIniContent);
 	}
 

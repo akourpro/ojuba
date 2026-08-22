@@ -108,11 +108,15 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 /**
  * نظير installerUpdateHtaccess()/installerUpdateUserIni() لكن لملفات لوحة
  * التحكم الخاصة بها (abma/.htaccess + abma/.user.ini) — تحمل سلسلة
- * auto_prepend_file/auto_append_file منفصلة تماماً عن الجذر
- * (abma/autoload.php + abma/footer.php)، ونفس مشكلة توافق المسار النسبي
- * الموثَّقة أعلاه تنطبق هنا أيضاً (بل هي مصدر الخطأ الفعلي المُكتشَف: مستخدم
- * واجه "Failed opening required 'abma/autoload.php'" على استضافة حقيقية لأن
- * القيمة كانت نسبية). كلا الملفين يجب أن يحملا مساراً مطلقاً دائماً.
+ * auto_prepend_file منفصلة تماماً عن الجذر (abma/autoload.php)، ونفس مشكلة
+ * توافق المسار النسبي الموثَّقة أعلاه تنطبق هنا أيضاً (بل هي مصدر الخطأ
+ * الفعلي المُكتشَف: مستخدم واجه "Failed opening required 'abma/autoload.php'"
+ * على استضافة حقيقية لأن القيمة كانت نسبية) — يجب أن يحمل مساراً مطلقاً دائماً.
+ * auto_append_file يبقى ثابتاً على "none" عمداً (وليس مساراً مطلقاً لـ
+ * abma/footer.php كما كان سابقاً): abma/autoload.php أصبح يُحمِّل footer.php
+ * بنفسه عبر register_shutdown_function() — إبقاء auto_append_file يشير له
+ * أيضاً على أي استضافة تُطبِّق هذا التوجيه فعلياً يُنتج فوتر مكرَّراً مرتين
+ * بلوحة التحكم (بلاغ مستخدم حقيقي). راجع CLAUDE.md لتفاصيل كاملة.
  */
 function installerUpdateAbmaEnvironmentFiles($rootDir)
 {
@@ -124,7 +128,7 @@ function installerUpdateAbmaEnvironmentFiles($rootDir)
 	$htOk = false;
 	if ($htContent !== false) {
 		$htContent = preg_replace('/^\s*php_value auto_prepend_file .*$/m', '    php_value auto_prepend_file "' . $realPath . 'abma/autoload.php"', $htContent);
-		$htContent = preg_replace('/^\s*php_value auto_append_file .*$/m', '    php_value auto_append_file "' . $realPath . 'abma/footer.php"', $htContent);
+		$htContent = preg_replace('/^\s*php_value auto_append_file .*$/m', '    php_value auto_append_file none', $htContent);
 		$htOk = @file_put_contents($htaccessPath, $htContent) !== false;
 	}
 
@@ -133,7 +137,7 @@ function installerUpdateAbmaEnvironmentFiles($rootDir)
 	$iniOk = false;
 	if ($iniContent !== false) {
 		$iniContent = preg_replace('/^auto_prepend_file=.*$/m', 'auto_prepend_file=' . $realPath . 'abma/autoload.php', $iniContent, 1);
-		$iniContent = preg_replace('/^auto_append_file=.*$/m', 'auto_append_file=' . $realPath . 'abma/footer.php', $iniContent, 1);
+		$iniContent = preg_replace('/^auto_append_file=.*$/m', 'auto_append_file=none', $iniContent, 1);
 		$iniOk = @file_put_contents($iniPath, $iniContent) !== false;
 	}
 
