@@ -105,19 +105,6 @@ function installerUpdateHtaccess($rootDir, $siteFolder)
 	return @file_put_contents($htaccessPath, $content) !== false;
 }
 
-/**
- * نظير installerUpdateHtaccess()/installerUpdateUserIni() لكن لملفات لوحة
- * التحكم الخاصة بها (abma/.htaccess + abma/.user.ini) — تحمل سلسلة
- * auto_prepend_file منفصلة تماماً عن الجذر (abma/autoload.php)، ونفس مشكلة
- * توافق المسار النسبي الموثَّقة أعلاه تنطبق هنا أيضاً (بل هي مصدر الخطأ
- * الفعلي المُكتشَف: مستخدم واجه "Failed opening required 'abma/autoload.php'"
- * على استضافة حقيقية لأن القيمة كانت نسبية) — يجب أن يحمل مساراً مطلقاً دائماً.
- * auto_append_file يبقى ثابتاً على "none" عمداً (وليس مساراً مطلقاً لـ
- * abma/footer.php كما كان سابقاً): abma/autoload.php أصبح يُحمِّل footer.php
- * بنفسه عبر register_shutdown_function() — إبقاء auto_append_file يشير له
- * أيضاً على أي استضافة تُطبِّق هذا التوجيه فعلياً يُنتج فوتر مكرَّراً مرتين
- * بلوحة التحكم (بلاغ مستخدم حقيقي). راجع CLAUDE.md لتفاصيل كاملة.
- */
 function installerUpdateAbmaEnvironmentFiles($rootDir)
 {
 	$real = realpath($rootDir);

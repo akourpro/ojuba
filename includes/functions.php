@@ -1226,7 +1226,10 @@ function mailingFindEmailListName($email, $excludeContactId = null)
 function sec_session_start($workspace)
 {
 	global $site;
-	$session_name = $workspace;   // Set a custom session name 
+	if (session_status() === PHP_SESSION_ACTIVE) {
+		return;
+	}
+	$session_name = $workspace;   // Set a custom session name
 	$secure = true;
 	// This stops JavaScript being able to access the session id.
 	$httponly = true;
