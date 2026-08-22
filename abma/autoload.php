@@ -33,6 +33,7 @@ require_once $__ojubaRoot . '/includes/csrf.php';
 $csrf = new CSRF_Protect("_csrf", "OJUBA-abma");
 
 register_shutdown_function(function () use ($__ojubaRoot) {
+    global $site;
     require $__ojubaRoot . '/abma/footer.php';
 });
 
