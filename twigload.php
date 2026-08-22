@@ -163,13 +163,8 @@ $twig->addGlobal('routes', [
 ]);
 
 $twig->addGlobal('currentLang', safer(@$_COOKIE['lang']));
-// "لغة الموقع الرئيسية" (إعدادات الموقع > اللغة ونوع الموقع): both / ar / en.
-// تستخدمها القوالب لإخفاء زر تبديل اللغة ووسوم hreflang عندما تكون لغة واحدة فقط
-// مفعّلة — مثال: {% if languageMode == 'both' %} ... {% endif %}
 $twig->addGlobal('languageMode', $site['language_mode'] ?? 'both');
-// إعدادات شريط الأخبار العاجلة (Ticker) — من صفحة إعدادات الموقع > شريط الأخبار
-// العاجلة. عامة لأي قالب يعرض شريطاً متحركاً؛ القوالب التي لا تحتوي شريطاً تتجاهل
-// هذين المتغيّرين بأمان. مثال استخدام: style="animation-duration:{{ tickerSpeed }}s"
+
 $twig->addGlobal('tickerEnabled', !empty($site['ticker_enabled']));
 $twig->addGlobal('tickerSpeed', max(6, (int) ($site['ticker_speed'] ?? 26)));
 if (safer(@$_COOKIE['lang']) == "en") {

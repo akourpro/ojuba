@@ -1,8 +1,5 @@
 <?php
-// بوتستراب صريح بدل الاعتماد على auto_prepend_file (بعض الاستضافات لا تدعمه
-// إطلاقاً — راجع تعليق abma/autoload.php لتفاصيل كاملة). آمن حتى لو نجح
-// auto_prepend_file أيضاً على استضافات أخرى، لأن require_once يتجاهل أي
-// تحميل مكرَّر لنفس الملف تلقائياً.
+
 $__d = __DIR__;
 while (!is_file($__d . '/autoload.php') && $__d !== dirname($__d)) {
     $__d = dirname($__d);
@@ -83,9 +80,9 @@ if (isset($_POST['submit'])) {
 <link rel="stylesheet" href="../js/select2.css">
 <script src="../js/select2.min.js"></script>
 <?php if (!blogsFeaturedColumnExists()): ?>
-<div class="alert alert-warning">
-  خاصية "مقال مميّز/عاجل" غير مُجهَّزة بعد بقاعدة البيانات. <a href="blogs/migrate">اضغط هنا لتشغيل الترحيل مرة واحدة</a> لتفعيلها.
-</div>
+    <div class="alert alert-warning">
+        خاصية "مقال مميّز/عاجل" غير مُجهَّزة بعد بقاعدة البيانات. <a href="blogs/migrate">اضغط هنا لتشغيل الترحيل مرة واحدة</a> لتفعيلها.
+    </div>
 <?php endif; ?>
 <div class="card mb-4">
     <h5 class="card-header">انشاء مقالة جديدة</h5>
@@ -167,32 +164,35 @@ if (isset($_POST['submit'])) {
                 <button type="button" class="btn btn-sm btn-outline-secondary mt-2 media-picker-btn" data-target="#imageInputNew"><i class="mdi mdi-image-multiple-outline"></i> اختر من المكتبة</button>
             </div>
             <?php if (blogsFeaturedColumnExists()): ?>
-            <div class="col-md-6">
-                <div class="form-check form-switch mt-2">
-                    <input class="form-check-input" type="checkbox" role="switch" name="featured" id="featuredSwitch">
-                    <label class="form-check-label" for="featuredSwitch">مقال مميّز / عاجل</label>
+                <div class="col-md-6">
+                    <label class="switch switch-lg">
+                        <input type="checkbox" class="switch-input" role="switch" name="featured" id="featuredSwitch">
+                        <span class="switch-toggle-slider">
+                            <span class="switch-on"></span>
+                            <span class="switch-off"></span>
+                        </span>
+                        <span class="switch-label">مقال مميّز / عاجل</span>
+                    </label>
                 </div>
-                <small class="form-text text-muted">يظهر بأولوية في شريط الأخبار العاجلة والمقال الرئيسي بقوالب الأخبار.</small>
-            </div>
             <?php endif; ?>
             <?php if (blogsRelatedMatchColumnExists() && moduleEnabled('matches') && matchesTableExists()): ?>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    <select class="form-select select2" name="related_match_id">
-                        <option value="">بدون ربط بمباراة</option>
-                        <?php
-                        dbSelect("sport_matches", "id, competition, team_home, team_away, match_date", "WHERE status = ? ORDER BY match_date DESC", ["active"]);
-                        if ($countrows >= 1) {
-                            foreach ($rows as $match_row) {
-                                echo '<option value="' . $match_row['id'] . '">' . $match_row['team_home'] . ' × ' . $match_row['team_away'] . ' — ' . htmlspecialchars($match_row['competition'], ENT_QUOTES, 'UTF-8') . ' (' . date('Y-m-d', strtotime($match_row['match_date'])) . ')</option>';
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        <select class="form-select select2" name="related_match_id">
+                            <option value="">بدون ربط بمباراة</option>
+                            <?php
+                            dbSelect("sport_matches", "id, competition, team_home, team_away, match_date", "WHERE status = ? ORDER BY match_date DESC", ["active"]);
+                            if ($countrows >= 1) {
+                                foreach ($rows as $match_row) {
+                                    echo '<option value="' . $match_row['id'] . '">' . $match_row['team_home'] . ' × ' . $match_row['team_away'] . ' — ' . htmlspecialchars($match_row['competition'], ENT_QUOTES, 'UTF-8') . ' (' . date('Y-m-d', strtotime($match_row['match_date'])) . ')</option>';
+                                }
                             }
-                        }
-                        ?>
-                    </select>
-                    <label>المباراة المرتبطة <sup class="text-success">(اختياري)</sup></label>
+                            ?>
+                        </select>
+                        <label>المباراة المرتبطة <sup class="text-success">(اختياري)</sup></label>
+                    </div>
+                    <small class="form-text text-muted">إن اخترت مباراة، يعرض القالب صندوق ملخص المباراة أعلى صفحة المقال (يدعمه قالب OjubaSport حالياً).</small>
                 </div>
-                <small class="form-text text-muted">إن اخترت مباراة، يعرض القالب صندوق ملخص المباراة أعلى صفحة المقال (يدعمه قالب OjubaSport حالياً).</small>
-            </div>
             <?php endif; ?>
         </div>
         <div class="pt-4">

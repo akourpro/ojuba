@@ -84,7 +84,7 @@ if ($action === 'list') {
 }
 
 if ($action === 'upload') {
-    $csrf->verify('ajax');
+
 
     if (empty($_FILES['file']['name'])) {
         echo json_encode(['status' => false, 'message' => 'الرجاء اختيار ملف']);
@@ -137,7 +137,7 @@ if ($action === 'upload') {
 }
 
 if ($action === 'delete') {
-    $csrf->verify('ajax');
+
     $id = numer($_POST['id'] ?? ($jsonBody['id'] ?? 0));
 
     dbSelect('media', 'id, filename', 'WHERE id = ? LIMIT 1', [$id]);

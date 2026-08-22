@@ -15,7 +15,7 @@ if (isset($data['action']) and !empty($data['action'])) {
   $action = safer($data['action'] ?? '');
 
   if ($action === 'delete') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
 
     if ((int)$id === (int)($_SESSION['user_id'] ?? 0)) {

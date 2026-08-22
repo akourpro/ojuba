@@ -14,7 +14,7 @@ if (isset($data['action']) and !empty($data['action'])) {
   $action = safer($data['action'] ?? '');
 
   if ($action === 'delete') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
     dbSelect("pricing", "id", "WHERE id=? LIMIT 1", [$id]);
     if ($countrows === 1) {

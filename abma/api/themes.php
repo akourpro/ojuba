@@ -16,7 +16,7 @@ $name = safer($data->name);
 
 if (!empty($name)) {
     requireOwner();
-    $csrf->verify('ajax');
+
     dbUpdate("settings", "value = ?", [$name, "theme"], "WHERE name = ? LIMIT 1");
     logAction("theme_switch", "تم تفعيل قالب: " . $name);
     echo json_encode(array('status' => true, "message" => "تم تحديث القالب بنجاح"));

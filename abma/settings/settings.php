@@ -84,8 +84,6 @@ if (isset($_POST['submit'])) {
         $businessType = isset($businessTypeOptions[$_POST['business_type'] ?? '']) ? $_POST['business_type'] : 'organization';
         saveSetting('business_type', $businessType);
 
-        // إعدادات شريط الأخبار العاجلة — نفس أسلوب saveSetting() لاحتمال عدم وجود صف
-        // بجدول settings بعد (تركيبات لم تُحدَّث)
         $tickerEnabled = isset($_POST['ticker_enabled']) ? 1 : 0;
         saveSetting('ticker_enabled', $tickerEnabled);
         $tickerSpeed = (int) ($_POST['ticker_speed'] ?? 26);
@@ -93,10 +91,6 @@ if (isset($_POST['submit'])) {
         if ($tickerSpeed > 120) $tickerSpeed = 120;
         saveSetting('ticker_speed', $tickerSpeed);
 
-        // روابط المسارات القابلة للتخصيص — تحقق من صحة كل رابط مُدخَل (بما فيها
-        // التعارض مع الأنواع الأخرى) قبل الحفظ، ثم إعادة توليد الكتلة المُدارة
-        // بملف .htaccess. أي خطأ تحقّق يُلغي حفظ روابط المسارات فقط (بقية
-        // الإعدادات أعلاه تُحفظ بنجاح دائماً) ويُعرض رسالة توضيحية.
         $routeTypes = customizableRoutes();
         $submittedRoutes = [];
         foreach ($routeTypes as $type => $default) {
@@ -476,12 +470,12 @@ if (isset($_POST['submit'])) {
     // إظهار/إخفاء قسم "شريط الأخبار العاجلة" فوراً عند تغيير نوع الموقع، دون
     // انتظار حفظ النموذج — يبقى الإخفاء النهائي (server-side) قائماً في PHP
     // أعلاه كمصدر الحقيقة الفعلي بعد أي حفظ/تحديث للصفحة.
-    (function () {
+    (function() {
         var relevantTypes = ['news_site', 'sports_site', 'blog_site'];
         var businessTypeSelect = document.querySelector('select[name="business_type"]');
         var tickerSection = document.getElementById('tickerSettingsSection');
         if (!businessTypeSelect || !tickerSection) return;
-        businessTypeSelect.addEventListener('change', function () {
+        businessTypeSelect.addEventListener('change', function() {
             tickerSection.style.display = relevantTypes.indexOf(this.value) !== -1 ? '' : 'none';
         });
     })();

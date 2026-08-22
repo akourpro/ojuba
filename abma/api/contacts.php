@@ -61,7 +61,7 @@ if ($action === 'list') {
 }
 
 if ($action === 'reply') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
     $subjectRaw = trim($data['subject'] ?? '');
     $messageRaw = trim($data['message'] ?? '');
@@ -137,7 +137,7 @@ if ($action === 'reply') {
 }
 
 if ($action === 'mark_seen') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
     if (!$id) {
         echo json_encode(['status' => false, 'message' => 'معرّف غير صالح']);

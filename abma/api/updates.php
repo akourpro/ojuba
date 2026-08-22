@@ -1,16 +1,7 @@
 <?php
-// بوتستراب صريح خفيف (بدون تسجيل دخول تلقائي أو هيدر/فوتر إداري — هذا الملف
-// صفحة دخول/خروج أو نقطة AJAX تتحقق من الصلاحيات بنفسها) بدل الاعتماد على
-// auto_prepend_file. راجع تعليق abma/minimal.php لتفاصيل كاملة.
+
 require_once dirname(__DIR__) . '/minimal.php';
-?>
-<?php
-/**
- * نقطة AJAX خاصة بلوحة التحكم لصفحة "الإصدار والتحديثات" (abma/updates) —
- * owner فقط. نفس اصطلاح abma/api/feeds.php بالضبط (isOwner() + $csrf->verify('ajax')
- * + JSON)، مع إضافة قفل بسيط على action=apply لمنع تشغيل عمليتي تحديث في نفس
- * الوقت (مثلاً بسبب نقر مزدوج على الزر).
- */
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isOwner()) {
@@ -31,7 +22,6 @@ $action = safer($data['action']);
 require_once 'includes/updater.php';
 
 if ($action === 'check') {
-  $csrf->verify('ajax');
   $result = updaterCheckForUpdate(true);
   if (!$result['ok']) {
     echo json_encode(['status' => false, 'message' => 'تعذّر التحقق من التحديثات: ' . ($result['error'] ?? '')]);
@@ -47,8 +37,6 @@ if ($action === 'check') {
 }
 
 if ($action === 'apply') {
-  $csrf->verify('ajax');
-
   $lockDir = getpath() . 'abma/tmp/updates/';
   if (!is_dir($lockDir)) {
     @mkdir($lockDir, 0755, true);

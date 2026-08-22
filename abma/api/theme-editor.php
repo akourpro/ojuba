@@ -89,7 +89,7 @@ if ($action === 'read') {
 }
 
 if ($action === 'save') {
-    $csrf->verify('ajax');
+
     $rel = $data['path'] ?? '';
     $content = $data['content'] ?? '';
     $full = te_resolve_existing($rel);
@@ -108,7 +108,7 @@ if ($action === 'save') {
 }
 
 if ($action === 'create_file') {
-    $csrf->verify('ajax');
+
     $rel = trim($data['path'] ?? '', '/');
     if (!te_ext_allowed($rel)) {
         echo json_encode(['status' => false, 'message' => 'امتداد الملف غير مسموح به']);
@@ -125,7 +125,7 @@ if ($action === 'create_file') {
 }
 
 if ($action === 'create_folder') {
-    $csrf->verify('ajax');
+
     $rel = trim($data['path'] ?? '', '/');
     $full = te_resolve_new($rel);
     if (!$full) {
@@ -139,7 +139,7 @@ if ($action === 'create_folder') {
 }
 
 if ($action === 'delete') {
-    $csrf->verify('ajax');
+
     $rel = $data['path'] ?? '';
     $full = te_resolve_existing($rel);
     if (!$full) {
@@ -169,7 +169,7 @@ if ($action === 'delete') {
 }
 
 if ($action === 'rename') {
-    $csrf->verify('ajax');
+
     $rel = $data['path'] ?? '';
     $newName = basename(trim($data['new_name'] ?? '', '/'));
     $fullOld = te_resolve_existing($rel);

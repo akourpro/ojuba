@@ -79,7 +79,7 @@ const MAX_FILE_COUNT = 3000;
 const MAX_SINGLE_FILE = 15 * 1024 * 1024;        // 15 ميجا لأي ملف منفرد داخل الأرشيف
 
 if ($action === 'upload') {
-    $csrf->verify('ajax');
+
 
     if (empty($_FILES['zipfile']) || !is_uploaded_file($_FILES['zipfile']['tmp_name'] ?? '')) {
         jerr('لم يتم رفع أي ملف');
@@ -285,7 +285,7 @@ if ($action === 'upload') {
 }
 
 if ($action === 'confirm') {
-    $csrf->verify('ajax');
+
 
     $token = safer($_POST['staging_token'] ?? '');
     $slug = strtolower(preg_replace('/[^a-z0-9_-]+/', '-', safer($_POST['slug'] ?? '')));

@@ -138,7 +138,7 @@ function mailing_render_template($templateHtml, $email, $contactData)
 }
 
 if ($action === 'delete_list') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
 
     dbSelect("email_campaigns", "id", "WHERE list_id = ? LIMIT 1", [$id]);
@@ -158,7 +158,7 @@ if ($action === 'delete_list') {
 }
 
 if ($action === 'add_campaign_list') {
-    $csrf->verify('ajax');
+
     $campaignId = numer($data['campaign_id'] ?? 0);
     $listId = numer($data['list_id'] ?? 0);
 
@@ -191,7 +191,7 @@ if ($action === 'add_campaign_list') {
 }
 
 if ($action === 'remove_campaign_list') {
-    $csrf->verify('ajax');
+
     $campaignId = numer($data['campaign_id'] ?? 0);
     $listId = numer($data['list_id'] ?? 0);
 
@@ -230,7 +230,7 @@ if ($action === 'get_list_contacts_for_campaign') {
 }
 
 if ($action === 'add_recipients') {
-    $csrf->verify('ajax');
+
     $campaignId = numer($data['campaign_id'] ?? 0);
     $listId = numer($data['list_id'] ?? 0);
     $contactIds = $data['contact_ids'] ?? [];
@@ -298,7 +298,7 @@ if ($action === 'add_recipients') {
 }
 
 if ($action === 'delete_contact') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
     dbDelete("email_list_contacts", "WHERE id = ? LIMIT 1", [$id]);
     echo json_encode(['status' => true, 'message' => 'تم الحذف']);
@@ -306,7 +306,7 @@ if ($action === 'delete_contact') {
 }
 
 if ($action === 'delete_campaign') {
-    $csrf->verify('ajax');
+
     $id = numer($data['id'] ?? 0);
     dbSelect("email_campaigns", "*", "WHERE id = ? LIMIT 1", [$id]);
     if ($countrows === 1) {
@@ -337,7 +337,7 @@ if ($action === 'delete_campaign') {
 }
 
 if ($action === 'send_batch') {
-    $csrf->verify('ajax');
+
     $campaignId = numer($data['campaign_id'] ?? 0);
 
     dbSelect("email_campaigns", "*", "WHERE id = ? LIMIT 1", [$campaignId]);

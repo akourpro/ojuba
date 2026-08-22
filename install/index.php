@@ -353,10 +353,6 @@ if ($step === 4) {
 					}
 				}
 
-				// زرع صف إعدادات مبني على ما أدخله صاحب الموقع فعلياً بالخطوة السابقة
-				// (رابط الموقع، اللغة، الاسم/الوصف/الكلمات الدلالية، نوع النشاط) — بدل
-				// قيم افتراضية ثابتة. القيم المتبقية غير المُدخَلة تعتمد على fallback
-				// الافتراضي بدالة gsite() (functions.php).
 				$submitted = $_SESSION['install_site_info'];
 				$siteFolder = $_SESSION['install_site_folder'] ?? trim(parse_url($submitted['site_url'], PHP_URL_PATH) ?? '', '/');
 				$defaultSettings = [
@@ -379,6 +375,7 @@ if ($step === 4) {
 					'snapchat' => null,
 					'discord' => null,
 					'twitter' => null,
+					'telegram' => null,
 					'github' => null,
 					'linkedin' => null,
 					'youtube' => null,
@@ -398,8 +395,25 @@ if ($step === 4) {
 					// Whatsapp
 					'wa_appkey' => null,
 					'wa_authkey' => null,
+					// Settings
 					'language_mode' => $submitted['language_mode'],
 					'business_type' => $submitted['business_type'],
+					'ticker_enabled' => '0',
+					'ticker_speed' => '10',
+					'newsletter_list_id' => '0',
+					'feeds_cron_token' => null,
+					'feeds_cron_last_run' => null,
+					'update_last_checked_at' => null,
+					'update_last_error' => null,
+					'scheduled_backup_last_at' => null,
+					'scheduled_backup_last_error' => null,
+					'update_latest_version' => null,
+					'update_latest_tag' => null,
+					'update_latest_name' => null,
+					'update_latest_notes' => null,
+					'update_latest_published_at' => null,
+					'update_latest_html_url' => null,
+					'update_latest_zip_url' => null,
 				];
 				$insertSetting = $installCon->prepare("INSERT INTO settings (name, value) VALUES (?, ?)");
 				foreach ($defaultSettings as $k => $v) {

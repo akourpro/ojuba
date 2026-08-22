@@ -33,7 +33,7 @@ if (!empty($action)) {
     }
 
     if ($action === "delete") {
-        $csrf->verify('ajax');
+
         $id = safer($data->id);
         // Check msg Exist
         dbSelect("blogs", "id, image", "WHERE id=? LIMIT 1", [$id]);

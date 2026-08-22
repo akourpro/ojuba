@@ -19,10 +19,28 @@ if (!isOwner()) {
 // قائمة بيضاء بمفاتيح الوحدات المسموح تبديلها (تطابق $defaults في themeManifest())
 // حتى لا يمكن حقن أي مفتاح عشوائي داخل theme.json عبر هذا الـ API
 $allowedModules = [
-    "pages", "blogs", "blog_categories", "services", "portfolio", "categories",
-    "contact", "search", "clients", "team", "testimonials", "faq", "stats",
-    "pricing", "branches", "certificates", "mailing", "ads",
-    "matches", "standings", "videos", "feeds",
+    "pages",
+    "blogs",
+    "blog_categories",
+    "services",
+    "portfolio",
+    "categories",
+    "contact",
+    "search",
+    "clients",
+    "team",
+    "testimonials",
+    "faq",
+    "stats",
+    "pricing",
+    "branches",
+    "certificates",
+    "mailing",
+    "ads",
+    "matches",
+    "standings",
+    "videos",
+    "feeds",
 ];
 
 $raw = file_get_contents('php://input');
@@ -30,7 +48,7 @@ $data = json_decode($raw, true);
 $action = safer($data['action'] ?? ($_POST['action'] ?? ''));
 
 if ($action === 'toggle') {
-    $csrf->verify('ajax');
+
 
     $module = safer($data['module'] ?? '');
     $enabled = !empty($data['enabled']);

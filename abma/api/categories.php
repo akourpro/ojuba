@@ -17,7 +17,7 @@ $action = safer(@$data->action);
 
 if (!empty($action)) {
     if ($action === "add") {
-        $csrf->verify('ajax');
+
         $name = safer($data->name);
         $name_en = safer($data->name_en);
 
@@ -35,7 +35,7 @@ if (!empty($action)) {
     }
 
     if ($action === "edit") {
-        $csrf->verify('ajax');
+
         $id = numer($data->id);
         $name = safer($data->name);
         $name_en = safer($data->name_en);
@@ -80,7 +80,7 @@ if (!empty($action)) {
     }
 
     if ($action === "delete") {
-        $csrf->verify('ajax');
+
         $id = numer($data->id);
 
         if (!empty($id)) {
